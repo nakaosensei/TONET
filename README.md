@@ -17,7 +17,7 @@ Ao extrair os arquivos zipados, você verá a seguinte estrutura de pastas:
 - 📂 src (Diretório de código do projeto, faça o git clone dentro do diretório src)
 
 
-# Guia rápido de instalação
+# Guia rápido de instalação de dependencias
 Para instalação das bibliotecas necessárias, acesse a pasta **inst-bibliotecas** e execute o comando:
 
 Comando: sudo ./downloadLibraries.sh

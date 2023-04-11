@@ -1,29 +1,22 @@
 """
 Carlini-Wagner attack (http://arxiv.org/abs/1608.04644).
-
 Referential implementation:
-
 - https://github.com/carlini/nn_robust_attacks.git (the original implementation)
 - https://github.com/rwightman/pytorch-nips2017-attack-example.git
 """
 import operator as op
-
 from typing import Union, Tuple
-
 import numpy as np
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
-
-import scripts.runutils
+import cwLibrary.runutils
 
 
 def _var2numpy(var):
     """
     Make Variable to numpy array. No transposition will be made.
-
     :param var: Variable instance on whatever device
     :type var: Variable
     :return: the corresponding numpy array
@@ -35,7 +28,6 @@ def _var2numpy(var):
 def atanh(x, eps=1e-6):
     """
     The inverse hyperbolic tangent function, missing in pytorch.
-
     :param x: a tensor or a Variable
     :param eps: used to enhance numeric stability
     :return: :math:`\\tanh^{-1}{x}`, of the same type as ``x``
@@ -48,7 +40,6 @@ def to_tanh_space(x, box):
     """
     Convert a batch of tensors to tanh-space. This method complements the
     implementation of the change-of-variable trick in terms of tanh.
-
     :param x: the batch of tensors, of dimension [B x C x H x W]
     :param box: a tuple of lower bound and upper bound of the box constraint
     :return: the batch of tensors in tanh-space, of the same dimension;
@@ -64,7 +55,6 @@ def from_tanh_space(x, box):
     Convert a batch of tensors from tanh-space to oridinary image space.
     This method complements the implementation of the change-of-variable trick
     in terms of tanh.
-
     :param x: the batch of tensors, of dimension [B x C x H x W]
     :param box: a tuple of lower bound and upper bound of the box constraint
     :return: the batch of tensors in ordinary image space, of the same
@@ -79,56 +69,37 @@ class L2Adversary(object):
     """
     The L2 attack adversary. To enforce the box constraint, the
     change-of-variable trick using tanh-space is adopted.
-
     The loss function to optimize:
-
     .. math::
         \\|\\delta\\|_2^2 + c \\cdot f(x + \\delta)
-
     where :math:`f` is defined as
-
     .. math::
         f(x') = \\max\\{0, (\\max_{i \\ne t}{Z(x')_i} - Z(x')_t) \\cdot \\tau + \\kappa\\}
-
     where :math:`\\tau` is :math:`+1` if the adversary performs targeted attack;
     otherwise it's :math:`-1`.
-
     Usage::
-
         attacker = L2Adversary()
         # inputs: a batch of input tensors
         # targets: a batch of attack targets
         # model: the model to attack
         advx = attacker(model, inputs, targets)
-
-
     The change-of-variable trick
     ++++++++++++++++++++++++++++
-
     Let :math:`a` be a proper affine transformation.
-
     1. Given input :math:`x` in image space, map :math:`x` to "tanh-space" by
-
     .. math:: \\hat{x} = \\tanh^{-1}(a^{-1}(x))
-
     2. Optimize an adversarial perturbation :math:`m` without constraint in the
     "tanh-space", yielding an adversarial example :math:`w = \\hat{x} + m`; and
-
     3. Map :math:`w` back to the same image space as the one where :math:`x`
     resides:
-
     .. math::
         x' = a(\\tanh(w))
-
     where :math:`x'` is the adversarial example, and :math:`\\delta = x' - x`
     is the adversarial perturbation.
-
     Since the composition of affine transformation and hyperbolic tangent is
     strictly monotonic, $\\delta = 0$ if and only if $m = 0$.
-
     Symbols used in docstring
     +++++++++++++++++++++++++
-
     - ``B``: the batch size
     - ``C``: the number of channels
     - ``H``: the height
@@ -167,18 +138,15 @@ class L2Adversary(object):
                perturbation is initialized to zero
         :type init_rand: bool
         :rtype: None
-
         Why to make ``box`` default to (-1., 1.) rather than (0., 1.)? TL;DR the
         domain of the problem in pytorch is [-1, 1] instead of [0, 1].
         According to Xiang Xu (samxucmu@gmail.com)::
-
         > The reason is that in pytorch a transformation is applied first
         > before getting the input from the data loader. So image in range [0,1]
         > will subtract some mean and divide by std. The normalized input image
         > will now be in range [-1,1]. For this implementation, clipping is
         > actually performed on the image after normalization, not on the
         > original image.
-
         Why to ``optimizer_lr`` default to 1e-2? The optimizer used in Carlini's
         code adopts 1e-2. In another pytorch implementation
         (https://github.com/rwightman/pytorch-nips2017-attack-example.git),
@@ -223,7 +191,6 @@ class L2Adversary(object):
     def __call__(self, model, inputs, targets, to_numpy=True):
         """
         Produce adversarial examples for ``inputs``.
-
         :param model: the model to attack
         :type model: nn.Module
         :param inputs: the original images tensor, of dimension [B x C x H x W].
@@ -306,8 +273,7 @@ class L2Adversary(object):
             scale_consts = torch.from_numpy(np.copy(scale_consts_np)).float()  # type: torch.FloatTensor
             scale_consts = runutils.make_cuda_consistent(model, scale_consts)[0]
             scale_consts_var = Variable(scale_consts, requires_grad=False)
-            print('Using scale consts:')
-            print(list(scale_consts_np))
+            #print 'Using scale consts:', list(scale_consts_np)  #FIXME
 
             # the minimum L2 norms of perturbations found during optimization
             best_l2 = np.ones(batch_size) * np.inf
@@ -321,7 +287,7 @@ class L2Adversary(object):
                     self._optimize(model, optimizer, inputs_tanh_var,
                                    pert_tanh_var, targets_oh_var,
                                    scale_consts_var)
-                if optim_step % 10 == 0: print('batch [{}] loss: {}'.format(optim_step, batch_loss))
+                #if optim_step % 10 == 0: print 'batch [{}] loss: {}'.format(optim_step, batch_loss)  #FIXME
 
                 if self.abort_early and not optim_step % (self.max_steps // 10):
                     if batch_loss > prev_batch_loss * (1 - self.ae_tol):
@@ -385,7 +351,6 @@ class L2Adversary(object):
                   targets_oh_var, c_var):
         """
         Optimize for one step.
-
         :param model: the model to attack
         :type model: nn.Module
         :param optimizer: the Adam optimizer to optimize ``modifier_var``
@@ -478,7 +443,6 @@ class L2Adversary(object):
     def _attack_successful(self, prediction, target):
         """
         See whether the underlying attack is successful.
-
         :param prediction: the prediction of the model on an input
         :type prediction: int
         :param target: either the attack target or the ground-truth image label
@@ -496,7 +460,6 @@ class L2Adversary(object):
         """
         Compensate for ``self.confidence`` and returns a new weighted sum
         vector.
-
         :param outputs: the weighted sum right before the last layer softmax
                normalization, of dimension [B x M]
         :type outputs: np.ndarray
@@ -524,7 +487,6 @@ class L2Adversary(object):
     def _to_tanh_space(self, x):
         """
         Convert a batch of tensors to tanh-space.
-
         :param x: the batch of tensors, of dimension [B x C x H x W]
         :return: the batch of tensors in tanh-space, of the same dimension
         """
@@ -533,7 +495,6 @@ class L2Adversary(object):
     def _from_tanh_space(self, x):
         """
         Convert a batch of tensors from tanh-space to input space.
-
         :param x: the batch of tensors, of dimension [B x C x H x W]
         :return: the batch of tensors in tanh-space, of the same dimension;
                  the returned tensor is on the same device as ``x``

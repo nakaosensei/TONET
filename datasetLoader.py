@@ -197,6 +197,9 @@ class TonetDataSet():
     def __len__(self):
         return len(self.labels)
 
+    def __calculate_std_mean__(self):
+        return torch.std_mean(self.tensorDatabase, dim=0, keepdim=True)
+
 
 def agregateTotals():
     files = ['entry1Registers.json','entry2Registers.json','entry3Registers.json','entry4Registers.json','entry5Registers.json','entry6Registers.json','entry7Registers.json','entry8Registers.json','entry9Registers.json','entry10Registers.json']

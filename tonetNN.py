@@ -2,11 +2,14 @@ from scipy.io import arff
 import json 
 import pandas as pd
 import torch
+from cwLibrary.cw import L2Adversary
 from neuralNetwork.lossFunctions import *
 from torch.utils.data import DataLoader
 from utils.pyTorchUtils import *
 from neuralNetwork.TONetModel import *
 from datasetLoader import TonetDataSet
+
+
 f = open('settings.json')
 settingsJson = json.load(f)
 DEVICE=get_device()
@@ -60,8 +63,15 @@ def runTraining(model):
     articleEpochs = settingsJson['epochs']
     
     tonetDataset = TonetDataSet(datasets)    
+    
+    
+
     preProcessed = tonetDataset.preProcessDataset()
     tonetDataset.loadDataset(preProcessed)
+    meanStd = tonetDataset.__calculate_std_mean__()
+    mean = meanStd[0]
+    std = meanStd[1]
+    
     #loss_fn = distanceLoss2Norm
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
@@ -73,8 +83,13 @@ def runTraining(model):
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_dataloader, model, loss_fn, optimizer)
         test(test_dataloader, model, loss_fn)
+        
+        runCw2(model, train_dataloader, mean, std)
+        
     torch.save(model.state_dict(), trainingPath)
     print("Done!")  
+    
+    return model
 
 def runTest(model):
     articleBatchSize = settingsJson['batchSize']
@@ -85,14 +100,33 @@ def runTest(model):
     test_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
     test(test_dataloader, model, loss_fn)
 
+def runCw2(net, dataloader, mean, std):
+    inputs_box = (min((0 - m) / s for m, s in zip(mean, std)),max((1 - m) / s for m, s in zip(mean, std)))
+    # an untargeted adversary
+    adversary = L2Adversary(targeted=False,confidence=0.0,search_steps=10,box=inputs_box, optimizer_lr=5e-4)
+
+    inputs, targets = next(iter(dataloader))
+    adversarial_examples = adversary(net, inputs, targets, to_numpy=False)
+    assert isinstance(adversarial_examples, torch.FloatTensor)
+    assert adversarial_examples.size() == inputs.size()
+
+    # a targeted adversary
+    adversary = L2Adversary(targeted=True,confidence=0.0,search_steps=10,box=inputs_box,optimizer_lr=5e-4)
+    inputs, _ = next(iter(dataloader))
+    # a batch of any attack targets
+    attack_targets = torch.ones(inputs.size(0)) * 3
+    adversarial_examples = adversary(net, inputs, attack_targets, to_numpy=False)
+    assert isinstance(adversarial_examples, torch.FloatTensor)
+    assert adversarial_examples.size() == inputs.size()
 
 if __name__=='__main__':    
     #To train a model, we need a loss function and an optimizer.    
     model = ToNetNeuralNetwork()
-    #model.load_state_dict(torch.load(trainingPath))
-    #model.eval()    
+    model.load_state_dict(torch.load(trainingPath))
+    model.eval()    
     runTraining(model)
     #runTest(model)
+
     
     
     

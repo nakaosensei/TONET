@@ -1,3 +1,4 @@
+
 from operator import methodcaller
 
 import torch
@@ -8,7 +9,6 @@ from torch.autograd import Variable
 def get_cuda_state(obj):
     """
     Get cuda state of any object.
-
     :param obj: an object (a tensor or an `torch.nn.Module`)
     :raise TypeError:
     :return: True if the object or the parameter set of the object
@@ -29,15 +29,12 @@ def is_cuda_consistent(*args):
     """
     See if the cuda states are consistent among variables (of type either
     tensors or torch.autograd.Variable). For example,
-
         import torch
         from torch.autograd import Variable
         import torch.nn as nn
-
         net = nn.Linear(512, 10)
         tensor = torch.rand(10, 10).cuda()
         assert not is_cuda_consistent(net=net, tensor=tensor)
-
     :param args: the variables to test
     :return: True if len(args) == 0 or the cuda states of all elements in args
              are consistent; False otherwise
@@ -58,7 +55,6 @@ def make_cuda_consistent(refobj, *args):
     inconsistent with ``refobj``, raise ValueError, since changing the cuda state
     of a Variable involves rewrapping it in a new Variable, which changes the
     semantics of the code.
-
     :param refobj: either the referential object or the cuda state of the
            referential object
     :param args: the variables to test
@@ -88,7 +84,6 @@ def predict(net, inputs):
     """
     Predict labels. The cuda state of `net` decides that of the returned
     prediction tensor.
-
     :param net: the network
     :param inputs: the input tensor (non Variable), of dimension [B x C x W x H]
     :return: prediction tensor (LongTensor), of dimension [B]
