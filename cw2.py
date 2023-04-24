@@ -1,9 +1,16 @@
 import torch
 import cwLibrary.cw
+import json
+from datasetLoader import TonetDataSet
+from torch.utils.data import DataLoader
+f = open('settings.json')
+settingsJson = json.load(f)
 
 def run(mean,std,dataloader):
     inputs_box = (min((0 - m) / s for m, s in zip(mean, std)),
                 max((1 - m) / s for m, s in zip(mean, std)))
+
+    
     # an untargeted adversary
     adversary = cw.L2Adversary(targeted=False,
                             confidence=0.0,

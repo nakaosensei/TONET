@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
-import cwLibrary.runutils
+import cwLibrary.runutils as runutils
 
 
 def _var2numpy(var):
@@ -226,7 +226,8 @@ class L2Adversary(object):
         targets = runutils.make_cuda_consistent(model, targets)[0]  # type: torch.FloatTensor
 
         # run the model a little bit to get the `num_classes`
-        num_classes = model(Variable(inputs[0][None, :], requires_grad=False)).size(1)  # type: int
+        #num_classes = model(Variable(inputs[0][None, :], requires_grad=False)).size(1)  # type: int
+        num_classes = 6
         batch_size = inputs.size(0)  # type: int
 
         # `lower_bounds_np`, `upper_bounds_np` and `scale_consts_np` are used
@@ -374,6 +375,10 @@ class L2Adversary(object):
         # of dimension [B x C x H x W]
         advxs_var = self._from_tanh_space(inputs_tanh_var + pert_tanh_var)  # type: Variable
         # the perturbed activation before softmax
+        print('advxs_var')
+        print(advxs_var)
+        print(len(advxs_var))
+        print(len(advxs_var[0]))
         pert_outputs_var = model(advxs_var)  # type: Variable
         # the original inputs
         inputs_var = self._from_tanh_space(inputs_tanh_var)  # type: Variable
