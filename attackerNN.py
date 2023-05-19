@@ -6,13 +6,13 @@ from neuralNetwork.lossFunctions import *
 from torch.utils.data import DataLoader
 from utils.pyTorchUtils import *
 from neuralNetwork.AttackerModel import *
-from datasetLoader import TonetDataSet
+from datasetLoaders.datasetLoader import TonetDataSet
 f = open('settings.json')
 settingsJson = json.load(f)
 DEVICE=get_device()
 datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
 trainingPath = '../savedModels/attackedModel'
-debugMode = False
+debugMode = True
 
 def train(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
@@ -25,7 +25,10 @@ def train(dataloader, model, loss_fn, optimizer):
             print(X)
             print('len(y):'+str(len(y)))
             print(y)
-        pred = model(X)        
+        pred = model(X)          
+        
+        print("pred")
+        print(pred)
         loss = loss_fn(pred, y)
 
         # Backpropagation

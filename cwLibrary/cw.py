@@ -12,6 +12,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 import cwLibrary.runutils as runutils
+import json
 
 
 def _var2numpy(var):
@@ -212,7 +213,7 @@ class L2Adversary(object):
         """
         # sanity check
         assert isinstance(model, nn.Module)
-        assert len(inputs.size()) == 4
+        assert len(inputs.size()) == 2
         assert len(targets.size()) == 1
 
         # get a copy of targets in numpy before moving to GPU, used when doing
@@ -226,8 +227,8 @@ class L2Adversary(object):
         targets = runutils.make_cuda_consistent(model, targets)[0]  # type: torch.FloatTensor
 
         # run the model a little bit to get the `num_classes`
-        #num_classes = model(Variable(inputs[0][None, :], requires_grad=False)).size(1)  # type: int
-        num_classes = 6
+        num_classes = model(Variable(inputs, requires_grad=False)).size(1)  # type: int
+        #num_classes = 6
         batch_size = inputs.size(0)  # type: int
 
         # `lower_bounds_np`, `upper_bounds_np` and `scale_consts_np` are used
@@ -249,15 +250,29 @@ class L2Adversary(object):
         o_best_advx = inputs.clone().cpu().numpy()  # type: np.ndarray
 
         # convert `inputs` to tanh-space
-        inputs_tanh = self._to_tanh_space(inputs)  # type: torch.FloatTensor
+        
+        
+        torch.save(inputs, 'inputs.pt')
+
+        #inputs_tanh = self._to_tanh_space(inputs)  # type: torch.FloatTensor
+        tanh_function = nn.Tanh()
+        inputs_tanh = tanh_function(inputs)
+
+        torch.save(inputs_tanh, 'inputs_tanh.pt')
+        
+        
         inputs_tanh_var = Variable(inputs_tanh, requires_grad=False)
 
         # the one-hot encoding of `targets`
         targets_oh = torch.zeros(targets.size() + (num_classes,))  # type: torch.FloatTensor
+        
         targets_oh = runutils.make_cuda_consistent(model, targets_oh)[0]
-        targets_oh.scatter_(1, targets.unsqueeze(1), 1.0)
-        targets_oh_var = Variable(targets_oh, requires_grad=False)
 
+        targets_oh.scatter_(1, targets.unsqueeze(1), 1.0)
+
+        torch.save(targets_oh, 'targets_oh.pt')
+        
+        targets_oh_var = Variable(targets_oh, requires_grad=False)
         # the perturbation variable to optimize.
         # `pert_tanh` is essentially the adversarial perturbation in tanh-space.
         # In Carlini's code it's denoted as `modifier`
@@ -274,8 +289,7 @@ class L2Adversary(object):
             scale_consts = torch.from_numpy(np.copy(scale_consts_np)).float()  # type: torch.FloatTensor
             scale_consts = runutils.make_cuda_consistent(model, scale_consts)[0]
             scale_consts_var = Variable(scale_consts, requires_grad=False)
-            #print 'Using scale consts:', list(scale_consts_np)  #FIXME
-
+            
             # the minimum L2 norms of perturbations found during optimization
             best_l2 = np.ones(batch_size) * np.inf
             # the perturbed predictions corresponding to `best_l2`, to be used
@@ -285,11 +299,8 @@ class L2Adversary(object):
             prev_batch_loss = np.inf  # type: float
             for optim_step in range(self.max_steps):
                 batch_loss, pert_norms_np, pert_outputs_np, advxs_np = \
-                    self._optimize(model, optimizer, inputs_tanh_var,
-                                   pert_tanh_var, targets_oh_var,
-                                   scale_consts_var)
-                #if optim_step % 10 == 0: print 'batch [{}] loss: {}'.format(optim_step, batch_loss)  #FIXME
-
+                    self._optimize(model, optimizer, inputs_tanh_var,pert_tanh_var, targets_oh_var,scale_consts_var)
+                
                 if self.abort_early and not optim_step % (self.max_steps // 10):
                     if batch_loss > prev_batch_loss * (1 - self.ae_tol):
                         break
@@ -298,9 +309,7 @@ class L2Adversary(object):
                 # update best attack found during optimization
                 pert_predictions_np = np.argmax(pert_outputs_np, axis=1)
                 comp_pert_predictions_np = np.argmax(
-                        self._compensate_confidence(pert_outputs_np,
-                                                    targets_np),
-                        axis=1)
+                        self._compensate_confidence(pert_outputs_np,targets_np),axis=1)
                 for i in range(batch_size):
                     l2 = pert_norms_np[i]
                     cppred = comp_pert_predictions_np[i]
@@ -348,8 +357,18 @@ class L2Adversary(object):
             o_best_advx = torch.from_numpy(o_best_advx).float()
         return o_best_advx
 
-    def _optimize(self, model, optimizer, inputs_tanh_var, pert_tanh_var,
-                  targets_oh_var, c_var):
+    def writeTensorOnJson(self,targetTensor):
+        outFile = []
+        for i in range(0,len(targetTensor)):
+            outFile.append([])
+            for element in targetTensor[i]:
+                outFile[i].append(element)
+        jsonString = json.dumps(outFile)
+        jsonFile = open("advxs_var.json", "w")
+        jsonFile.write(jsonString)
+        jsonFile.close()
+
+    def _optimize(self, model, optimizer, inputs_tanh_var, pert_tanh_var,targets_oh_var, c_var):
         """
         Optimize for one step.
         :param model: the model to attack
@@ -373,19 +392,25 @@ class L2Adversary(object):
         """
         # the adversarial examples in the image space
         # of dimension [B x C x H x W]
+
+
+        torch.save(inputs_tanh_var, 'inputs_tanh_var.pt')
+        torch.save(pert_tanh_var, 'pert_tanh_var.pt')
         advxs_var = self._from_tanh_space(inputs_tanh_var + pert_tanh_var)  # type: Variable
+
+        advxs_var = advxs_var.detach()
+
         # the perturbed activation before softmax
-        print('advxs_var')
-        print(advxs_var)
-        print(len(advxs_var))
-        print(len(advxs_var[0]))
+    
+
+        torch.save(advxs_var, 'advxs_var.pt')
         pert_outputs_var = model(advxs_var)  # type: Variable
+
         # the original inputs
         inputs_var = self._from_tanh_space(inputs_tanh_var)  # type: Variable
 
         perts_norm_var = torch.pow(advxs_var - inputs_var, 2)
-        perts_norm_var = torch.sum(perts_norm_var.view(
-                perts_norm_var.size(0), -1), 1)
+        perts_norm_var = torch.sum(perts_norm_var.view(perts_norm_var.size(0), -1), 1)
 
         # In Carlini's code, `target_activ_var` is called `real`.
         # It should be a Variable of tensor of dimension [B], such that the
@@ -393,6 +418,9 @@ class L2Adversary(object):
         # of the $t$th class, where $t$ is the attack target or the image label
         #
         # noinspection PyArgumentList
+
+        
+
         target_activ_var = torch.sum(targets_oh_var * pert_outputs_var, 1)
         inf = 1e4  # sadly pytorch does not work with np.inf;
                    # 1e4 is also used in Carlini's code
@@ -410,8 +438,7 @@ class L2Adversary(object):
         # noinspection PyArgumentList
         assert (pert_outputs_var.max(1)[0] >= -inf).all(), 'assumption failed'
         # noinspection PyArgumentList
-        maxother_activ_var = torch.max(((1 - targets_oh_var) * pert_outputs_var
-                                        - targets_oh_var * inf), 1)[0]
+        maxother_activ_var = torch.max(((1 - targets_oh_var) * pert_outputs_var - targets_oh_var * inf), 1)[0]
 
         # Compute $f(x')$, where $x'$ is the adversarial example in image space.
         # The result `f_var` should be of dimension [B]
@@ -438,8 +465,13 @@ class L2Adversary(object):
         batch_loss_var.backward()
         optimizer.step()
 
+        torch.save(batch_loss_var, 'batch_loss_var.pt')
+
         # Make some records in python/numpy on CPU
-        batch_loss = batch_loss_var.data[0]  # type: float
+        batch_loss = batch_loss_var.data  # type: float
+
+        
+
         pert_norms_np = _var2numpy(perts_norm_var)
         pert_outputs_np = _var2numpy(pert_outputs_var)
         advxs_np = _var2numpy(advxs_var)
@@ -496,6 +528,8 @@ class L2Adversary(object):
         :return: the batch of tensors in tanh-space, of the same dimension
         """
         return to_tanh_space(x, self.box)
+
+    
 
     def _from_tanh_space(self, x):
         """

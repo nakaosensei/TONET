@@ -1,7 +1,7 @@
 from scipy.io import arff
 import json 
 from classifiers.classifiers import *
-from datasetLoader import TonetDataSet
+from datasetLoaders.datasetLoader import TonetDataSet
 f = open('settings.json')
 settingsJson = json.load(f)
 

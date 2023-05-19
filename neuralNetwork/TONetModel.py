@@ -9,7 +9,7 @@ class ToNetNeuralNetwork(nn.Module):
        
     def __init__(self):
         super().__init__()
-        self.flatten = nn.Flatten()
+        
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(20, 64),
             nn.LeakyReLU(),
@@ -23,7 +23,8 @@ class ToNetNeuralNetwork(nn.Module):
         )
 
     def forward(self, x):
-        x = self.flatten(x)
+        #print(x)
+        
         logits = self.linear_relu_stack(x)
         return logits
 

@@ -111,23 +111,28 @@ def runCw2(net, dataloader, mean, std):
     inputs_box = mountInputsBox(mean,std)
     #inputs_box = (min((0 - m) / s for m, s in zipped),max((1 - m) / s for m, s in zipped))
     # an untargeted adversary
+    print('box')
+    print(inputs_box)
     adversary = L2Adversary(targeted=False,confidence=0.0,search_steps=10,box=inputs_box, optimizer_lr=1e-3)
 
     inputs, targets = next(iter(dataloader))
     outputs = net(torch.autograd.Variable(inputs))
-    
+    print('inputs')
+    print(inputs)
     #inputs = torch.unsqueeze(inputs,dim=0)
     #inputs = torch.unsqueeze(inputs,dim=0)
+    print(len(inputs.size()))
+    print('outputs')
+    print(type(outputs))
+    print(outputs)
     
-    adversarial_examples = adversary(net, inputs, targets, to_numpy=False)
-    torch.save(adversarial_examples, 'adversarial_examples.pt')
+    print('targets')
+    print(len(targets.size()))
 
+    adversarial_examples = adversary(net, inputs, targets, to_numpy=False)
     assert isinstance(adversarial_examples, torch.FloatTensor)
     assert adversarial_examples.size() == inputs.size()
 
-    return adversarial_examples
-
-    '''
     # a targeted adversary
     adversary = L2Adversary(targeted=True,confidence=0.0,search_steps=10,box=inputs_box,optimizer_lr=1e-3)
     inputs, _ = next(iter(dataloader))
@@ -136,19 +141,23 @@ def runCw2(net, dataloader, mean, std):
     adversarial_examples = adversary(net, inputs, attack_targets, to_numpy=False)
     assert isinstance(adversarial_examples, torch.FloatTensor)
     assert adversarial_examples.size() == inputs.size()
-    '''
+
 
 def testAdvxs_var(model):
-    tensor = torch.load('inputs_tanh.pt')
+    tensor = torch.load('inputs.pt')
     out = ""
-    for i in range(0, len(tensor)):
-        for j in range(0,len(tensor[i])):
-            out+=str(float(tensor[i][j]))+' | '
-        out+='\n'
-    f = open('inputs_tanh.txt','w')
+   
+    
+    tanhFunction = torch.nn.Tanh()
+    output = tanhFunction(tensor)
+    for i in range(0, len(output)):
+       for j in range(0,len(output[i])):
+           out+=str(float(output[i][j]))+' | '
+       out+='\n'
+    print(out)
+    f = open('tahnFunctionNN.txt','w')
     f.write(out)
     f.close()
-    pred = model(tensor)
     exit()
     for i in range(0,len(pred)):
         for j in range(0,len(pred[i])):
@@ -160,8 +169,8 @@ if __name__=='__main__':
     model = ToNetNeuralNetwork()
     model.load_state_dict(torch.load(trainingPath))
     model.eval()    
-    #testAdvxs_var(model)
-    runTraining(model)
+    testAdvxs_var(model)
+    #runTraining(model)
     #runTest(model)
 
     
