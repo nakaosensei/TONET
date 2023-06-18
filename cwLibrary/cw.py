@@ -270,7 +270,7 @@ class L2Adversary(object):
 
         targets_oh.scatter_(1, targets.unsqueeze(1), 1.0)
 
-        torch.save(targets_oh, 'targets_oh.pt')
+        #torch.save(targets_oh, 'targets_oh.pt')
         
         targets_oh_var = Variable(targets_oh, requires_grad=False)
         # the perturbation variable to optimize.
@@ -297,10 +297,12 @@ class L2Adversary(object):
             best_l2_ppred = -np.ones(batch_size)
             # previous (summed) batch loss, to be used in early stopping policy
             prev_batch_loss = np.inf  # type: float
+            i = 0
             for optim_step in range(self.max_steps):
-                batch_loss, pert_norms_np, pert_outputs_np, advxs_np = \
-                    self._optimize(model, optimizer, inputs_tanh_var,pert_tanh_var, targets_oh_var,scale_consts_var)
                 
+                batch_loss, pert_norms_np, pert_outputs_np, advxs_np = \
+                    self._optimize(model, optimizer, inputs_tanh_var,pert_tanh_var, targets_oh_var,scale_consts_var,optim_step)
+                i+=1
                 if self.abort_early and not optim_step % (self.max_steps // 10):
                     if batch_loss > prev_batch_loss * (1 - self.ae_tol):
                         break
@@ -368,7 +370,7 @@ class L2Adversary(object):
         jsonFile.write(jsonString)
         jsonFile.close()
 
-    def _optimize(self, model, optimizer, inputs_tanh_var, pert_tanh_var,targets_oh_var, c_var):
+    def _optimize(self, model, optimizer, inputs_tanh_var, pert_tanh_var,targets_oh_var, c_var, index):
         """
         Optimize for one step.
         :param model: the model to attack
@@ -393,9 +395,9 @@ class L2Adversary(object):
         # the adversarial examples in the image space
         # of dimension [B x C x H x W]
 
-
-        torch.save(inputs_tanh_var, 'inputs_tanh_var.pt')
-        torch.save(pert_tanh_var, 'pert_tanh_var.pt')
+        
+        #torch.save(inputs_tanh_var, 'inputs_tanh_var.pt')
+        #torch.save(pert_tanh_var, 'pert_tanh_var.pt')
         advxs_var = self._from_tanh_space(inputs_tanh_var + pert_tanh_var)  # type: Variable
 
         advxs_var = advxs_var.detach()
@@ -403,7 +405,8 @@ class L2Adversary(object):
         # the perturbed activation before softmax
     
 
-        torch.save(advxs_var, 'advxs_var.pt')
+        #torch.save(advxs_var, '../inputs/adversarial/advxs_var_'+str(index)+'.pt')
+        #torch.save(targets_oh_var, '../inputs/targets/targets_oh_var_'+str(index)+'.pt')
         pert_outputs_var = model(advxs_var)  # type: Variable
 
         # the original inputs
@@ -455,8 +458,7 @@ class L2Adversary(object):
             # `self.confidence`
             #
             # noinspection PyArgumentList
-            f_var = torch.clamp(target_activ_var - maxother_activ_var
-                                + self.confidence, min=0.0)
+            f_var = torch.clamp(target_activ_var - maxother_activ_var + self.confidence, min=0.0)
         # the total loss of current batch, should be of dimension [1]
         batch_loss_var = torch.sum(perts_norm_var + c_var * f_var)  # type: Variable
 
@@ -465,7 +467,7 @@ class L2Adversary(object):
         batch_loss_var.backward()
         optimizer.step()
 
-        torch.save(batch_loss_var, 'batch_loss_var.pt')
+        #torch.save(batch_loss_var, 'batch_loss_var.pt')
 
         # Make some records in python/numpy on CPU
         batch_loss = batch_loss_var.data  # type: float

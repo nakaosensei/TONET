@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from utils.pyTorchUtils import *
 from neuralNetwork.AttackerModel import *
 from datasetLoaders.datasetLoader import TonetDataSet
+from datasetLoaders.datasetLoaderAdversarial import AdversarialDataSet
 f = open('settings.json')
 settingsJson = json.load(f)
 DEVICE=get_device()
@@ -89,13 +90,36 @@ def runTest(model):
     test_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
     test(test_dataloader, model, loss_fn)
 
+def test_adversarialExamples(model):
+    tensor = torch.load('adversarial_examples.pt')
+    out = ""
+    for i in range(0, len(tensor)):
+        for j in range(0,len(tensor[i])):
+            out+=str(float(tensor[i][j]))+' | '
+        out+='\n'
+    f = open('adversarial_examples.txt','w')
+    f.write(out)
+    f.close()
 
-if __name__=='__main__':    
-    #To train a model, we need a loss function and an optimizer.    
-    model = AttackerNetwork()
+    #pred = model(X)
+    #test_loss += loss_fn(pred, y).item()
+    #correct += (pred.argmax(1) == y).type(torch.float).sum().item()
     
+    
+    return model
+
+if __name__=='__main__':   
+    datasetsPath = '../inputs/sampleAdversarial/'
+    advDataset = AdversarialDataSet(datasetsPath)
+    preProcessed = advDataset.preProcessDataset()
+    advDataset.loadDataset(preProcessed)
+    
+    
+    #To train a model, we need a loss function and an optimizer.    
+    #model = AttackerNetwork()
+    #test_adversarialExamples(model)
     #model.eval()    
-    runTraining(model)
+    #runTraining(model)
     #runTest(model)
     
     

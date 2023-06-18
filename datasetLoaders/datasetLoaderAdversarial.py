@@ -2,6 +2,7 @@ from scipy.io import arff
 import numpy as np
 import json 
 import pandas as pd
+import os
 import torch
 from torch.utils.data import DataLoader
 from utils.pyTorchUtils import *
@@ -13,16 +14,17 @@ settingsJson = json.load(f)
 labelsColumn = settingsJson['labelsColumn']
 
 
-class TonetDataSet():
+class AdversarialDataSet():
 
-    def __init__(self,dataSetsName):
+    def __init__(self,dataSetsPath,labelsPath):
         self.labels = None
         self.labelsStr = None
         self.labelsHashMap = {}
         self.tensorDatabase = None
-        self.dataSetsName=dataSetsName
-    
-    
+        self.dataSetsPath=dataSetsPath
+        self.labelsPath=labelsPath
+        
+
     def upSampleClasses(self, dataset, classesHashMap):
         classesNames = list(classesHashMap.keys())
         maxSize = len(classesHashMap[classesNames[0]])
@@ -98,32 +100,21 @@ class TonetDataSet():
         
         return {'labels':labels,'dataset':reducedDataset}
 
-    def filterClasses(self,arffLoadedData):
+    def filterClasses(self,data,labels):
         classesHashMap = {} #key: classname value: array [] of registers
         outputDataset = []
-        for i in range(0, len(arffLoadedData)):
-            arffLoadedData[i] = self.keepOnlyUsedColumns(arffLoadedData[i].tolist())
-            arffLoadedData[i] = self.convertVoidNoneTypesToEmptyStr(arffLoadedData[i])      
-
-        for i in range(0,len(arffLoadedData)):            
-            className = arffLoadedData[i][-1]
+        
+        for i in range(0,len(data)):            
+            className = labels[i]
             if className not in classesHashMap:
                 classesHashMap[className]=[]
-            classesHashMap[className].append(arffLoadedData[i])
+            classesHashMap[className].append(data[i])
                        
-        for i in range(0,len(arffLoadedData)):           
-            className = arffLoadedData[i][-1]
-            if className not in classesHashMap:
-                continue
-            if len(classesHashMap[className])<=2000:
-                del classesHashMap[className]
-                continue    
-            outputDataset.append(arffLoadedData[i])
+        for i in range(0,len(data)):                           
+            outputDataset.append(data[i])
+        #self.writeClassHashMap(classesHashMap)
         
-        upSampleResults = self.upSampleClasses(outputDataset,classesHashMap) 
-        classesHashMap = upSampleResults[1]  
-        splitDatasetLabels = self.removeLabels(upSampleResults[0])
-        return {'database':splitDatasetLabels['dataset'],'labels':splitDatasetLabels['labels'],'classesHashMap':classesHashMap}
+        return {'database':outputDataset,'labels':labels,'classesHashMap':classesHashMap}
 
     def joinUDPColumns(self,totalData):
         for register in totalData:
@@ -140,24 +131,35 @@ class TonetDataSet():
 
     def preProcessDataset(self):
         totalData = []
+        labels = []
         print('Will load the datasets...')
-        for dataset in self.dataSetsName:
-            data = arff.loadarff(settingsJson[dataset])
-            totalData.extend(data[0])
-        print('Raw Datasets loaded and jointed: COMPLETE')
-        self.joinUDPColumns(totalData)
-        print('Agregated UDP Columns: COMPLETE')
-
-        filteredData = self.filterClasses(totalData)
-        print('Upscaled the database: COMPLETE') 
-               
-        print('Qt. registers on database:'+str(len(filteredData['database'])))
-                
+        dataSetsName = os.listdir(self.dataSetsPath)
+        for datasetNm in dataSetsName:
+            if '.pt' not in datasetNm:
+                continue            
+            tensor = torch.load(self.dataSetsPath+datasetNm)                   
+            for register in tensor:                
+                totalData.append(register)
+        classesNames = os.listdir(self.labelsPath)
+        for datasetNm in classesNames:
+            if '.pt' not in datasetNm:
+                continue
+            tensor = torch.load(self.labelsPath+datasetNm)    
+            for register in tensor:
+                labels.append(register)
+        print('Raw Datasets loaded: COMPLETE')
         
+        filteredData = self.filterClasses(totalData, labels)
+        print('Filter classes: COMPLETE') 
+                    
+        print('Qt. registers on database:'+str(len(filteredData['database'])))
+        #self.writeUpSampledDatabase(filteredData['database'])
         return filteredData
-    
+   
+
     def loadDataset(self, preProcessed):            
-        self.tensorDatabase = torch.tensor(preProcessed['database'])
+        self.tensorDatabase = preProcessed['database']       
+
         tensorSizes = {}
         for tensor in self.tensorDatabase:
             tensorSizes[len(tensor)]=0
@@ -166,10 +168,11 @@ class TonetDataSet():
         self.labelsHashMap = {}
         for i in range(0,len(self.labelsStr)):
             if self.labelsStr[i] not in self.labelsHashMap:
-                self.labelsHashMap[self.labelsStr[i]]=len(self.labelsHashMap.keys())                 
+                self.labelsHashMap[self.labelsStr[i].item()]=len(self.labelsHashMap.keys())                 
+        
         self.labels = []
         for lb in self.labelsStr:
-            self.labels.append(self.labelsHashMap[lb])
+            self.labels.append(self.labelsHashMap[lb.item()])
         self.labels = torch.tensor(self.labels)
 
     def __getitem__(self, idx):        
@@ -196,12 +199,29 @@ def agregateTotals():
     with open('../inputs/agregado.json', 'w') as f:
         json.dump(totalJson, f)
 
+def saveTensorAsStringFile(tensor,filename):
+    out = ""
+    for i in range(0, len(tensor)):
+        for j in range(0,len(tensor[i])):
+            if j==0:
+                out+='['
+            out+=str(float(tensor[i][j]))
+            if j!=len(tensor[i])-1:
+                out+=','
+            else:
+                out+=']'            
+        out+='\n'
+    f = open(filename,'w')
+    f.write(out)
+    f.close()
+
 if __name__=='__main__':    
-    datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
-    tonetDataset = TonetDataSet(datasets)
-    preProcessed = tonetDataset.preProcessDataset()
-    tonetDataset.loadDataset(preProcessed)
-    train_dataloader = DataLoader(tonetDataset, batch_size=1000)
+    datasetsPath = '../inputs/sampleAdversarial/'
+    labelsPath = '../inputs/sampleTarget/'
+    advDataset = AdversarialDataSet(datasetsPath,labelsPath)
+    preProcessed = advDataset.preProcessDataset()
+    advDataset.loadDataset(preProcessed)
+    train_dataloader = DataLoader(advDataset, batch_size=1000)
     train_features, train_labels = next(iter(train_dataloader))
     exit()
     for (X, y) in enumerate(train_dataloader):

@@ -19,11 +19,7 @@ trainingPath='../savedModels/trainedTonet'
 def train(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
     model.train()
-    for batch, (X, y) in enumerate(dataloader):        
-        # Compute prediction error
-        #print(X)
-        #print(len(X))
-        #print(len(X[0]))
+    for batch, (X, y) in enumerate(dataloader):     
         pred = model(X)        
         loss = loss_fn(pred, y)
         # Backpropagation
@@ -35,14 +31,13 @@ def train(dataloader, model, loss_fn, optimizer):
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
 def test(dataloader, model, loss_fn):
-    size = len(dataloader.dataset)
-    #print(size)
+    size = len(dataloader.dataset)    
     num_batches = len(dataloader)
     model.eval()
     test_loss, correct = 0, 0
     with torch.no_grad():
         for X, y in dataloader:            
-            pred = model(X)
+            pred = model(X)            
             test_loss += loss_fn(pred, y).item()
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
     test_loss /= num_batches
@@ -61,22 +56,18 @@ def runTraining(model):
     mean = torch.unsqueeze(meanStd[0],dim=0)
     std = torch.unsqueeze(meanStd[1],dim=0) 
     
-    #loss_fn = distanceLoss2Norm
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
     train_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
     test_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
     epochs = articleEpochs
-    #epochs = 1
+    epochs = 1
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_dataloader, model, loss_fn, optimizer)
-        test(test_dataloader, model, loss_fn)        
-        runCw2(model, train_dataloader, meanStd[0], meanStd[1])
-        
+        test(test_dataloader, model, loss_fn)             
     torch.save(model.state_dict(), trainingPath)
-    print("Done!")  
-    
+    print("Done!")    
     return model
 
 def runTest(model):
@@ -107,62 +98,14 @@ def mountInputsBox(mean,std):
         i+=1    
     return (min(menor),max(maior))    
 
-def runCw2(net, dataloader, mean, std):    
-    inputs_box = mountInputsBox(mean,std)
-    #inputs_box = (min((0 - m) / s for m, s in zipped),max((1 - m) / s for m, s in zipped))
-    # an untargeted adversary
-    adversary = L2Adversary(targeted=False,confidence=0.0,search_steps=10,box=inputs_box, optimizer_lr=1e-3)
-
-    inputs, targets = next(iter(dataloader))
-    outputs = net(torch.autograd.Variable(inputs))
-    
-    #inputs = torch.unsqueeze(inputs,dim=0)
-    #inputs = torch.unsqueeze(inputs,dim=0)
-    
-    adversarial_examples = adversary(net, inputs, targets, to_numpy=False)
-    torch.save(adversarial_examples, 'adversarial_examples.pt')
-
-    assert isinstance(adversarial_examples, torch.FloatTensor)
-    assert adversarial_examples.size() == inputs.size()
-
-    return adversarial_examples
-
-    '''
-    # a targeted adversary
-    adversary = L2Adversary(targeted=True,confidence=0.0,search_steps=10,box=inputs_box,optimizer_lr=1e-3)
-    inputs, _ = next(iter(dataloader))
-    # a batch of any attack targets
-    attack_targets = torch.ones(inputs.size(0)) * 3
-    adversarial_examples = adversary(net, inputs, attack_targets, to_numpy=False)
-    assert isinstance(adversarial_examples, torch.FloatTensor)
-    assert adversarial_examples.size() == inputs.size()
-    '''
-
-def testAdvxs_var(model):
-    tensor = torch.load('inputs_tanh.pt')
-    out = ""
-    for i in range(0, len(tensor)):
-        for j in range(0,len(tensor[i])):
-            out+=str(float(tensor[i][j]))+' | '
-        out+='\n'
-    f = open('inputs_tanh.txt','w')
-    f.write(out)
-    f.close()
-    pred = model(tensor)
-    exit()
-    for i in range(0,len(pred)):
-        for j in range(0,len(pred[i])):
-            print(float(pred[i][j]))
-    return model
-
 if __name__=='__main__':    
     #To train a model, we need a loss function and an optimizer.    
     model = ToNetNeuralNetwork()
     model.load_state_dict(torch.load(trainingPath))
     model.eval()    
-    #testAdvxs_var(model)
+    
     runTraining(model)
-    #runTest(model)
+    runTest(model)
 
     
     
