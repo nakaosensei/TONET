@@ -12,6 +12,7 @@ https://drive.google.com/file/d/1V-2RsMFhZZZe4eIr3aFays657RxNMngM/view?usp=shari
 Ao extrair os arquivos zipados, você verá a seguinte estrutura de pastas:
 - 📂 data (Contém as bases de dados carregadas)
 - 📂 inputs (Arquivos com informações sobre características da base de dados)
+- 📂 outputs (Arquivos gerados)
 - 📂 inst-bibliotecas (Dependências do projeto)
 - 📂 savedModels (Redes neurais salvas)
 - 📂 src (Diretório de código do projeto, faça o git clone dentro do diretório src)
@@ -35,6 +36,24 @@ python3 tonetNN.py
 Além da rede TONet, em diversos trabalhos é citada uma rede neural atacante, com uma configuração diferente nas camadas internas, para testar essa rede:
 ```bash
 python3 attackerNN.py
+```
+
+Também existem os códigos para gerar exemplos adversariais, no momento estão em desenvolvimento, mas para gerar usando a rede neural TONet de base:
+```bash
+python3 adversarialExamplesGenerator.py
+```
+E depois de gerar:
+```bash
+python3 adversarialExamplesTest.py
+```
+
+Ou ainda, se preferir gerar os exemplos adversariais de maneira estocástica, use:
+```bash
+python3 stochasticAdversarialGenerator.py
+```
+E para testar:
+```bash
+python3 stochasticAdversarialTester.py
 ```
 
 Por fim, existe um script que usa o classificador k-NN para a classificação dos pacotes, para o executar: 
