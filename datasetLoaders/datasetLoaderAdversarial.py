@@ -133,7 +133,7 @@ class AdversarialDataSet():
         totalData = []
         labels = []
         print('Will load the datasets...')
-        dataSetsName = os.listdir(self.dataSetsPath)
+        dataSetsName = os.listdir(self.dataSetsPath)        
         for datasetNm in dataSetsName:
             if '.pt' not in datasetNm:
                 continue            
@@ -216,8 +216,8 @@ def saveTensorAsStringFile(tensor,filename):
     f.close()
 
 if __name__=='__main__':    
-    datasetsPath = '../inputs/sampleAdversarial/'
-    labelsPath = '../inputs/sampleTarget/'
+    datasetsPath = '../outputs/adversarialExamples/'
+    labelsPath = '../outputs/targets/'
     advDataset = AdversarialDataSet(datasetsPath,labelsPath)
     preProcessed = advDataset.preProcessDataset()
     advDataset.loadDataset(preProcessed)

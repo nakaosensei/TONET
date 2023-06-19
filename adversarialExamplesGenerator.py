@@ -170,36 +170,7 @@ def runCw2(net, dataloader, mean, std):
     '''
 
 
-def save3DTensorAsStringFile(tensor,filename):
-    out = ""
-    for i in range(0, len(tensor)):
-        for j in range(0,len(tensor[i])):
-            if j==0:
-                out+='['
-            out+=str(float(tensor[i][j]))
-            if j!=len(tensor[i])-1:
-                out+=','
-            else:
-                out+=']'            
-        out+='\n'
-    f = open(filename,'w')
-    f.write(out)
-    f.close()
 
-def save2DTensorAsStringFile(tensor,filename):
-    out = ""
-    for i in range(0, len(tensor)):
-       if i==0:
-           out+='['
-       out+=str(float(tensor[i]))
-       if i!=len(tensor)-1:
-           out+=','
-       else:
-           out+=']'            
-    out+='\n'
-    f = open(filename,'w')
-    f.write(out)
-    f.close()
 
 def testAdvxs_var(model):
     tensor = torch.load('adversarial_examples.pt')

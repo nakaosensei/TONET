@@ -15,15 +15,13 @@ settingsJson = json.load(f)
 DEVICE=get_device()
 datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
 trainingPath='../savedModels/trainedTonet'
+featuresPath='../outputs/adversarialExamples/'
+targetsPath='../outputs/targets'
 
 def train(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
     model.train()
-    for batch, (X, y) in enumerate(dataloader):        
-        # Compute prediction error
-        #print(X)
-        #print(len(X))
-        #print(len(X[0]))
+    for batch, (X, y) in enumerate(dataloader):       
         pred = model(X)        
         loss = loss_fn(pred, y)
         # Backpropagation
@@ -81,8 +79,8 @@ def runTraining(model):
     return model
 
 def runTest(model):
-    datasetsPath = '../inputs/sampleAdversarial/'
-    labelsPath = '../inputs/sampleTarget/'
+    datasetsPath = featuresPath
+    labelsPath = targetsPath
     articleBatchSize = settingsJson['batchSize']
     advDataset = AdversarialDataSet(datasetsPath,labelsPath)
     preProcessed = advDataset.preProcessDataset()
@@ -145,39 +143,8 @@ def runCw2(net, dataloader, mean, std):
     assert isinstance(adversarial_examples, torch.FloatTensor)
     assert adversarial_examples.size() == inputs.size()
 
-def save3DTensorAsStringFile(tensor,filename):
-    out = ""
-    for i in range(0, len(tensor)):
-        for j in range(0,len(tensor[i])):
-            if j==0:
-                out+='['
-            out+=str(float(tensor[i][j]))
-            if j!=len(tensor[i])-1:
-                out+=','
-            else:
-                out+=']'            
-        out+='\n'
-    f = open(filename,'w')
-    f.write(out)
-    f.close()
-
-def save2DTensorAsStringFile(tensor,filename):
-    out = ""
-    for i in range(0, len(tensor)):
-       if i==0:
-           out+='['
-       out+=str(float(tensor[i]))
-       if i!=len(tensor)-1:
-           out+=','
-       else:
-           out+=']'            
-    out+='\n'
-    f = open(filename,'w')
-    f.write(out)
-    f.close()
-
 def generateTextFilesSamples():
-    basePath = '../inputs/sampleAdversarial/'
+    basePath = featuresPath 
     files = os.listdir(basePath)
     print(files)
     for fileName in files:
@@ -187,7 +154,7 @@ def generateTextFilesSamples():
         save3DTensorAsStringFile(tensor,basePath+fileName+'.txt')
         
 def generateTextFilesTargets():
-    basePath = '../inputs/sampleAdversarial/'
+    basePath = featuresPath
     files = os.listdir(basePath)
     print(files)
     for fileName in files:
@@ -218,14 +185,12 @@ def testAdvxs_var(model):
     return model
 
 if __name__=='__main__':    
-    #To train a model, we need a loss function and an optimizer.    
-       
-    
+    #Carrega o modelo pré-treinado  
     model = ToNetNeuralNetwork()
     model.load_state_dict(torch.load(trainingPath))
     model.eval()    
-    #testAdvxs_var(model)
-    #runTraining(model)
+
+    #Testa o modelo com base nos arquivos em featuresPath e targetsPath
     runTest(model)
 
     
