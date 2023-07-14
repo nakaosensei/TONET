@@ -9,12 +9,11 @@ from utils.pyTorchUtils import *
 from neuralNetwork.TONetModel import *
 from datasetLoaders.datasetLoader4D import TonetDataSet
 
-
 f = open('settings.json')
 settingsJson = json.load(f)
 DEVICE=get_device()
 datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
-trainingPath='../savedModels/trainedTonet'
+trainingPath='../savedModels/trainedTonetWeka'
 
 def train(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
@@ -60,8 +59,7 @@ def runTraining(model):
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
     train_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
     test_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
-    epochs = articleEpochs
-    epochs = 1
+    epochs = articleEpochs    
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_dataloader, model, loss_fn, optimizer)
@@ -102,13 +100,9 @@ if __name__=='__main__':
     #To train a model, we need a loss function and an optimizer.    
     model = ToNetNeuralNetwork()
     model.load_state_dict(torch.load(trainingPath))
-    model.eval()    
-    
-    runTraining(model)
+    model.eval()
+        
+    #runTraining(model)
     runTest(model)
-
-    
-    
-    
-    
+  
     

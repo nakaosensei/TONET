@@ -12,7 +12,7 @@ f = open('settings.json')
 settingsJson = json.load(f)
 DEVICE=get_device()
 datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
-trainingPath = '../savedModels/attackedModel'
+trainingPath = '../savedModels/attackedModelWeka'
 debugMode = True
 
 def train(dataloader, model, loss_fn, optimizer):
@@ -20,16 +20,19 @@ def train(dataloader, model, loss_fn, optimizer):
     model.train()
     for batch, (X, y) in enumerate(dataloader):        
         # Compute prediction error
+        '''
         if debugMode:
             print('X Instancias: len(X)'+str(len(X)))
             print('len(X[0]):'+str(len(X[0])))
             print(X)
             print('len(y):'+str(len(y)))
             print(y)
+        '''
         pred = model(X)          
         
-        print("pred")
-        print(pred)
+        #print("pred")
+        #print(pred)
+        
         loss = loss_fn(pred, y)
 
         # Backpropagation
@@ -109,17 +112,21 @@ def test_adversarialExamples(model):
     return model
 
 if __name__=='__main__':   
+    '''
     datasetsPath = '../inputs/sampleAdversarial/'
     advDataset = AdversarialDataSet(datasetsPath)
     preProcessed = advDataset.preProcessDataset()
     advDataset.loadDataset(preProcessed)
-    
+    '''
+    model = AttackerNetwork()
+    #model.load_state_dict(torch.load(trainingPath))
+    #model.eval()
     
     #To train a model, we need a loss function and an optimizer.    
     #model = AttackerNetwork()
     #test_adversarialExamples(model)
     #model.eval()    
-    #runTraining(model)
+    runTraining(model)
     #runTest(model)
     
     

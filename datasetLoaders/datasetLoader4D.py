@@ -208,7 +208,6 @@ if __name__=='__main__':
     tonetDataset.loadDataset(preProcessed)
     train_dataloader = DataLoader(tonetDataset, batch_size=1000)
     train_features, train_labels = next(iter(train_dataloader))
-    exit()
     for (X, y) in enumerate(train_dataloader):
         print(X)
         print(y)

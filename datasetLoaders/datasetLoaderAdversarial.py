@@ -111,8 +111,7 @@ class AdversarialDataSet():
             classesHashMap[className].append(data[i])
                        
         for i in range(0,len(data)):                           
-            outputDataset.append(data[i])
-        #self.writeClassHashMap(classesHashMap)
+            outputDataset.append(data[i])        
         
         return {'database':outputDataset,'labels':labels,'classesHashMap':classesHashMap}
 
@@ -135,25 +134,27 @@ class AdversarialDataSet():
         print('Will load the datasets...')
         dataSetsName = os.listdir(self.dataSetsPath)        
         for datasetNm in dataSetsName:
-            if '.pt' not in datasetNm:
+            if '.pt' not in datasetNm or '.txt' in datasetNm:
                 continue            
             tensor = torch.load(self.dataSetsPath+datasetNm)                   
             for register in tensor:                
                 totalData.append(register)
+                
         classesNames = os.listdir(self.labelsPath)
         for datasetNm in classesNames:
-            if '.pt' not in datasetNm:
+            if '.pt' not in datasetNm or '.txt' in datasetNm:
                 continue
             tensor = torch.load(self.labelsPath+datasetNm)    
-            for register in tensor:
+            for register in tensor:                
                 labels.append(register)
         print('Raw Datasets loaded: COMPLETE')
         
         filteredData = self.filterClasses(totalData, labels)
         print('Filter classes: COMPLETE') 
+        
                     
         print('Qt. registers on database:'+str(len(filteredData['database'])))
-        #self.writeUpSampledDatabase(filteredData['database'])
+        
         return filteredData
    
 
@@ -166,8 +167,8 @@ class AdversarialDataSet():
         
         self.labelsStr=preProcessed['labels']
         self.labelsHashMap = {}
-        for i in range(0,len(self.labelsStr)):
-            if self.labelsStr[i] not in self.labelsHashMap:
+        for i in range(0,len(self.labelsStr)):            
+            if self.labelsStr[i].item() not in self.labelsHashMap:
                 self.labelsHashMap[self.labelsStr[i].item()]=len(self.labelsHashMap.keys())                 
         
         self.labels = []
@@ -223,7 +224,8 @@ if __name__=='__main__':
     advDataset.loadDataset(preProcessed)
     train_dataloader = DataLoader(advDataset, batch_size=1000)
     train_features, train_labels = next(iter(train_dataloader))
-    exit()
+    
     for (X, y) in enumerate(train_dataloader):
         print(X)
         print(y)
+        exit()

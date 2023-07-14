@@ -57,6 +57,15 @@ if __name__=='__main__':
     for (X, y) in enumerate(dataloader):
         data = y[0]
         labels = y[1]
+        print('Data')
+        print(data)
+        print('Labels')
+        print(labels)
+
+        for i in range(0, len(data)):
+            for j in range(0, len(instancia)):
+                data[i][j] = data[i][j]*0.98
+
         save3DTensorAsStringFile(data,featuresPath+str(i))
         save2DTensorAsStringFile(labels,labelsPath+str(i))
         torch.save(data, featuresPath+str(i)+'.pt')

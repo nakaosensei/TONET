@@ -59,7 +59,7 @@ def runTraining(model):
     train_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
     test_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
     epochs = articleEpochs
-    epochs = 1
+    #epochs = 1
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_dataloader, model, loss_fn, optimizer)
