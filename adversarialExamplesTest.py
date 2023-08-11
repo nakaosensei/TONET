@@ -14,8 +14,8 @@ settingsJson = json.load(f)
 DEVICE=get_device()
 datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
 trainingPath='../savedModels/trainedTonet'
-featuresPath='../outputs/adversarialExamples/'
-targetsPath='../outputs/targets/'
+featuresPath='../outputs/originalDatabaseSamples/'
+targetsPath='../outputs/originalDatabaseTargets/'
 
 def test(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
