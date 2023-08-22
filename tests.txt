@@ -1,0 +1,10 @@
+../outputs/originalDatabaseSamples/
+Acurácia:95.11783280299429
+../outputs/datasetMixedSamples5/
+Acurácia:28.161204739248642
+../outputs/datasetMixedSamples10/
+Acurácia:21.074458782594697
+../outputs/datasetMixedSamples25/
+Acurácia:19.706067930831626
+../outputs/datasetMixedSamples50/
+Acurácia:17.612387175954712

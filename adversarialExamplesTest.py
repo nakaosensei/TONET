@@ -14,8 +14,7 @@ settingsJson = json.load(f)
 DEVICE=get_device()
 datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
 trainingPath='../savedModels/trainedTonet'
-featuresPath='../outputs/originalDatabaseSamples/'
-targetsPath='../outputs/originalDatabaseTargets/'
+
 
 def test(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
@@ -34,15 +33,23 @@ def test(dataloader, model, loss_fn):
     return 100*correct
 
 def runTest(model):
-    datasetsPath = featuresPath
-    labelsPath = targetsPath
-    articleBatchSize = settingsJson['batchSize']
-    advDataset = AdversarialDataSet(datasetsPath,labelsPath)
-    preProcessed = advDataset.preProcessDataset()
-    advDataset.loadDataset(preProcessed)
-    loss_fn = nn.CrossEntropyLoss()
-    test_dataloader = DataLoader(advDataset, batch_size=articleBatchSize, shuffle=True)
-    test(test_dataloader, model, loss_fn)
+    results = ''
+    for i in range(0, len(settingsJson['featuresPath'])):
+        print(settingsJson['featuresPath'][i])
+        datasetsPath = settingsJson['featuresPath'][i]
+        labelsPath = settingsJson['targetsPath'][i]       
+        
+        articleBatchSize = settingsJson['batchSize']
+        advDataset = AdversarialDataSet(datasetsPath,labelsPath)
+        preProcessed = advDataset.preProcessDataset()
+        advDataset.loadDataset(preProcessed)
+        loss_fn = nn.CrossEntropyLoss()
+        test_dataloader = DataLoader(advDataset, batch_size=articleBatchSize, shuffle=True)
+        accuracy = test(test_dataloader, model, loss_fn)
+        results += settingsJson['featuresPath'][i]+'\nAcurácia:'+str(accuracy)+'\n'
+    f = open('tests.txt','w')
+    f.write(results)
+    f.close()
 
 
 def runTraining(model):

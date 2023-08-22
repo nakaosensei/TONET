@@ -10,6 +10,8 @@
     "entry9":"../data/discriminationsFlowBasedClassification/entry09.weka.allclass.arff",
     "entry10":"../data/discriminationsFlowBasedClassification/entry10.weka.allclass.arff",
     "entry12":"../data/discriminationsFlowBasedClassification/entry12.weka.allclass.arff",
+    "featuresPath": ["../outputs/originalDatabaseSamples/","../outputs/datasetMixedSamples5/","../outputs/datasetMixedSamples10/","../outputs/datasetMixedSamples25/","../outputs/datasetMixedSamples50/"],
+    "targetsPath":  ["../outputs/originalDatabaseTargets/","../outputs/datasetMixedTargets5/","../outputs/datasetMixedTargets10/","../outputs/datasetMixedTargets25/","../outputs/datasetMixedTargets50/"],
     "labelsColumn":"266",
     "epochs":200,
     "batchSize":1000,
