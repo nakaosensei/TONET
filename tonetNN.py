@@ -13,7 +13,7 @@ f = open('settings.json')
 settingsJson = json.load(f)
 DEVICE=get_device()
 datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
-trainingPath='../savedModels/trainedTonetWeka'
+trainingPath='../savedModels/trainedTonet'
 
 def train(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
@@ -102,7 +102,7 @@ if __name__=='__main__':
     model.load_state_dict(torch.load(trainingPath))
     model.eval()
         
-    #runTraining(model)
+    runTraining(model)
     runTest(model)
   
     

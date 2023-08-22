@@ -12,7 +12,7 @@ https://drive.google.com/file/d/1V-2RsMFhZZZe4eIr3aFays657RxNMngM/view?usp=shari
 Ao extrair os arquivos zipados, você verá a seguinte estrutura de pastas:
 - 📂 data (Contém as bases de dados carregadas)
 - 📂 inputs (Arquivos com informações sobre características da base de dados)
-- 📂 outputs (Arquivos gerados)
+- 📂 outputs (Arquivos gerados, exemplos adversariais ficam aqui)
 - 📂 inst-bibliotecas (Dependências do projeto)
 - 📂 savedModels (Redes neurais salvas)
 - 📂 src (Diretório de código do projeto, faça o git clone dentro do diretório src)
@@ -28,36 +28,52 @@ git clone https://github.com/nakaosensei/TONET
 
 
 # Guia de execução
-Uma vez que todas as dependências forem supridas, acesse o diretório src, para gerar a rede neural proposta no trabalho TONet, faça:
-```bash
-python3 tonetNN.py
-```
+O primeiro passo importante é gerar os exemplos adversariais, no momento, o TONet é capaz de realizar essa tarefa de duas maneiras:
+- Através de uma rede neural artificial
+- Estocasticamente
 
-Além da rede TONet, em diversos trabalhos é citada uma rede neural atacante, com uma configuração diferente nas camadas internas, para testar essa rede:
-```bash
-python3 attackerNN.py
-```
-
-Também existem os códigos para gerar exemplos adversariais, no momento estão em desenvolvimento, mas para gerar usando a rede neural TONet de base:
+Para gerar exemplos adversariais através da rede artificial, utilize o script:
 ```bash
 python3 adversarialExamplesGenerator.py
 ```
-E depois de gerar:
+E depois de gerar, você realizar o teste dessas amostras:
 ```bash
 python3 adversarialExamplesTest.py
 ```
+Na prática, o script adversarialExamplesGenerator.py utiliza a rede neural pré treinada (que está no diretório ../savedModels/trainedTonet) para gerar as asmostras adversariais e salvar em ../../outputs/adversarialExamples e ../../outputs/targets
 
-Ou ainda, se preferir gerar os exemplos adversariais de maneira estocástica, use:
+O script adversarialExamplesTest é quem de fato realiza o teste da rede neural (../savedModels/trainedTonet) com as amostras geradas, para isso, ele realiza testes com:
+- Dados reais somente (../outputs/originalDatabaseSamples e ../outputs/originalDatabaseTargets)
+- Dados reais + 5% de amostras adversarias (../outputs/datasetMixedSamples5 e ../outputs/datasetMixedTargets5)
+- Dados reais + 10% de amostras adversarias (../outputs/datasetMixedSamples10 e ../outputs/datasetMixedTargets10)
+- Dados reais + 15% de amostras adversarias (../outputs/datasetMixedSamples15 e ../outputs/datasetMixedTargets15)
+- Dados reais + 25% de amostras adversarias (../outputs/datasetMixedSamples25 e ../outputs/datasetMixedTargets25)
+- Dados reais + 50% de amostras adversarias (../outputs/datasetMixedSamples50 e ../outputs/datasetMixedTargets50)
+
+Os resultados são então impressos na tela, e também escritos no arquivo tests.txt
+
+Para gerar os exemplos adversariais de maneira estocástica, use:
 ```bash
 python3 stochasticAdversarialGenerator.py
 ```
-E para testar:
+O script stochasticAdversarialGenerator.py tenta gerar exemplos adversariais de maneira intuitiva, de modo a gerar pequenas oscilações pelo produto das grandesas dos dados originais por constantes pré-definidas, as amostras adversariais estocásticas são salvas nos diretórios ../../outputs/stochasticAdversarialExamples e ../../outputs/stochasticTargets
+
+
+No momento, o teste das amostras estocásticas está fazendo a verificação considerando somente a rede neural treinada (../savedModels/trainedTonet) e os exemplos adversariais gerados como teste. Para testar as amostras geradas, use:
 ```bash
 python3 stochasticAdversarialTester.py
 ```
 
-Por fim, existe um script que usa o classificador k-NN para a classificação dos pacotes, para o executar: 
+Até aqui foram apresentados os scripts necessários para gerar e testar as amostras adversariais, mas existem mais operações possíveis, por exemplo, para treinar uma rede neural que será usada para gerar as amostras adversarias, use script:
 ```bash
+python3 tonetNN.py
+```
+
+Como bônus, foram realizados testes com outras configurações de redes neurais e do classificar k-NN sobre os dados originais, para os invocar, use:
+```bash
+python3 attackerNN.py
 python3 knnTester.py
 ```
+
+
 
