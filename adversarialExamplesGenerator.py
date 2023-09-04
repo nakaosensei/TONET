@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from utils.pyTorchUtils import *
 from neuralNetwork.TONetModel import *
 from datasetLoaders.datasetLoader4D import TonetDataSet
-
+import time
 
 f = open('settings.json')
 settingsJson = json.load(f)
@@ -64,12 +64,13 @@ def generateAdversarialExamples(model):
     train_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
     test_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
     epochs = articleEpochs
-    epochs = 1
+    #epochs = 1
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_dataloader, model, loss_fn, optimizer)
         test(test_dataloader, model, loss_fn)        
-        runCw2(model, train_dataloader, meanStd[0], meanStd[1])   
+        if t==epochs-1:
+            runCw2(model, train_dataloader, meanStd[0], meanStd[1])   
     print("Done!")    
     return model
 
@@ -102,10 +103,12 @@ def mountInputsBox(mean,std):
     return (min(menor),max(maior))    
 
 def runCw2(net, dataloader, mean, std):    
+    print('Will generate adversarial examples using CW2...')
     inputs_box = mountInputsBox(mean,std)
     adversary = L2Adversary(targeted=False,confidence=0.0,search_steps=10,box=inputs_box, optimizer_lr=1e-3)
     i = 0
     for batch, (X, y) in enumerate(dataloader):    
+        print(i)
         i+=1        
         inputs = X   
         targets = y
@@ -123,12 +126,17 @@ def testAdvxs_var(model):
     return model
 
 if __name__=='__main__':    
-    #To train a model, we need a loss function and an optimizer.    
+    #To train a model, we need a loss function and an optimizer.  
+    startTime = time.time()  
     model = ToNetNeuralNetwork()
     model.load_state_dict(torch.load(trainingPath))
     model.eval()   
     
     generateAdversarialExamples(model)
+    endTime = time.time()
+    print('Tempo de execucao:')
+    print(endTime-startTime)
+
     #runTest(model)
 
     
