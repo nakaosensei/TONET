@@ -114,7 +114,7 @@ def runCw2(net, dataloader, mean, std):
         targets = y
         adversarial_examples = adversary(net, inputs, targets, to_numpy=False)
         torch.save(adversarial_examples, settingsJson['adversarialExamplesSamplesPathML']+'adversarial_examples_'+str(i)+'.pt')
-        torch.save(targets, settingsJson['adversarialExamplesTargersPathML']+'targets_'+str(i)+'.pt')
+        torch.save(targets, settingsJson['adversarialExamplesTargersPathML']+'adversarial_examples_'+str(i)+'.pt')
 
 def testAdvxs_var(model):
     tensor = torch.load('adversarial_examples.pt')    

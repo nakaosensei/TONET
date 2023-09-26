@@ -6,7 +6,7 @@ f = open('settings.json')
 settingsJson = json.load(f)
 
 datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
-trainingPath = '../savedModels/trainedAttackertst'
+trainingPath = '../savedModels/trainedTonet'
 debugMode = False
 
 

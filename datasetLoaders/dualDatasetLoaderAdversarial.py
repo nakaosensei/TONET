@@ -14,15 +14,18 @@ settingsJson = json.load(f)
 labelsColumn = settingsJson['labelsColumn']
 
 
-class AdversarialDataSet():
+class DualAdversarialDataSet():
 
-    def __init__(self,dataSetsPath,labelsPath):
+    def __init__(self, originalDatasetPath, originalLabelsPath,adversarialDatasetPath,adversarialLabelsPath, labelsPercentage):
         self.labels = None
         self.labelsStr = None
         self.labelsHashMap = {}
         self.tensorDatabase = None
-        self.dataSetsPath=dataSetsPath
-        self.labelsPath=labelsPath
+        self.originalDatasetPath = originalDatasetPath
+        self.originalLabelsPath = originalLabelsPath
+        self.adversarialDatasetPath=adversarialDatasetPath
+        self.adversarialLabelsPath=adversarialLabelsPath
+        self.labelsPercentage = labelsPercentage
         
 
     def upSampleClasses(self, dataset, classesHashMap):
@@ -128,36 +131,52 @@ class AdversarialDataSet():
             totalData[i]=normalized.tolist()
         return totalData
 
+    def loadDatasetToArray(self,datasetNm,arrayToFill,path):
+        if '.pt' not in datasetNm or '.txt' in datasetNm:
+            return
+        tensor = torch.load(path+datasetNm)
+        for register in tensor:                
+            arrayToFill.append(register)
+
     def preProcessDataset(self):
         totalData = []
         labels = []
         print('Will load the datasets...')
-        dataSetsName = os.listdir(self.dataSetsPath)     
-        dataSetsName.sort()   
+        dataSetsName = os.listdir(self.originalDatasetPath)  
+        dataSetsName.sort()      
         for datasetNm in dataSetsName:
-            if '.pt' not in datasetNm or '.txt' in datasetNm:
-                continue            
-            tensor = torch.load(self.dataSetsPath+datasetNm)                   
-            for register in tensor:                
-                totalData.append(register)
-        
-        classesNames = os.listdir(self.labelsPath)
+            self.loadDatasetToArray(datasetNm,totalData,self.originalDatasetPath)
+                
+        classesNames = os.listdir(self.originalLabelsPath)
         classesNames.sort()
         for datasetNm in classesNames:
-            if '.pt' not in datasetNm or '.txt' in datasetNm:
-                continue
-            tensor = torch.load(self.labelsPath+datasetNm)    
-            for register in tensor:                
-                labels.append(register)
+            self.loadDatasetToArray(datasetNm,labels,self.originalLabelsPath)           
+        numberOfSamples = len(totalData)
+        print('Tamanho do dataset original:'+str(numberOfSamples))        
+        
+        numberOfConsideredFiles = int(len(dataSetsName)*(self.labelsPercentage/100))
+        print('Quantidade de arquivos adversarios considerada:'+str(numberOfConsideredFiles))
+        advDatasetsName = os.listdir(self.adversarialDatasetPath)  
+        advDatasetsName.sort()      
+        for i in range(0,len(advDatasetsName)):
+            if i>numberOfConsideredFiles:
+                break            
+            self.loadDatasetToArray(advDatasetsName[i],totalData,self.adversarialDatasetPath)
+                
+        advClassesNames = os.listdir(self.adversarialLabelsPath)
+        advClassesNames.sort()
+        for i in range(0,len(advClassesNames)):
+            if i>numberOfConsideredFiles:
+                break
+            self.loadDatasetToArray(advClassesNames[i],labels,self.adversarialLabelsPath)
         
         print('Raw Datasets loaded: COMPLETE')
         
         filteredData = self.filterClasses(totalData, labels)
-        print('Filter classes: COMPLETE') 
+        print('Filter classes: COMPLETE')
         
-                    
-        print('Qt. registers on database:'+str(len(filteredData['database'])))
-        
+        print('Porcentagem de amostras adversarias:'+str(self.labelsPercentage)+'%, Qtde amostras adversarias:'+str(len(filteredData['database'])-numberOfSamples))
+        print('Qt. registers on database:'+str(len(filteredData['database'])))        
         return filteredData
    
 
@@ -220,9 +239,12 @@ def saveTensorAsStringFile(tensor,filename):
     f.close()
 
 if __name__=='__main__':    
-    datasetsPath = '../outputs/adversarialExamples/'
-    labelsPath = '../outputs/targets/'
-    advDataset = AdversarialDataSet(datasetsPath,labelsPath)
+    originalDatasetPath = '../outputs/adversarialExamples/'
+    originalLabelsPath = '../outputs/targets/'
+    adversarialDatasetPath = '../outputs/adversarialExamples/'
+    adversarialLabelsPath = '../outputs/targets/'
+    labelsPercentage = 10
+    advDataset = DualAdversarialDataSet(originalDatasetPath, originalLabelsPath,adversarialDatasetPath,adversarialLabelsPath, labelsPercentage)
     preProcessed = advDataset.preProcessDataset()
     advDataset.loadDataset(preProcessed)
     train_dataloader = DataLoader(advDataset, batch_size=1000)

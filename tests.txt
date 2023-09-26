@@ -1,10 +1,14 @@
-../outputs/originalDatabaseSamples/
-Acurácia:95.11783280299429
-../outputs/datasetMixedSamples5/
-Acurácia:28.161204739248642
-../outputs/datasetMixedSamples10/
-Acurácia:21.074458782594697
-../outputs/datasetMixedSamples25/
-Acurácia:19.706067930831626
-../outputs/datasetMixedSamples50/
-Acurácia:17.612387175954712
+1por cento de amostras adversarias
+Acurácia:61.838061061516115
+5por cento de amostras adversarias
+Acurácia:59.68222322824287
+10por cento de amostras adversarias
+Acurácia:57.2246244837344
+20por cento de amostras adversarias
+Acurácia:52.908126466634386
+40por cento de amostras adversarias
+Acurácia:46.12084226961798
+50por cento de amostras adversarias
+Acurácia:43.40678613411919
+60por cento de amostras adversarias
+Acurácia:41.040422792390345
