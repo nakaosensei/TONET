@@ -252,13 +252,13 @@ class L2Adversary(object):
         # convert `inputs` to tanh-space
         
         
-        torch.save(inputs, 'inputs.pt')
+        #torch.save(inputs, 'inputs.pt')
 
         #inputs_tanh = self._to_tanh_space(inputs)  # type: torch.FloatTensor
         tanh_function = nn.Tanh()
         inputs_tanh = tanh_function(inputs)
 
-        torch.save(inputs_tanh, 'inputs_tanh.pt')
+        #torch.save(inputs_tanh, 'inputs_tanh.pt')
         
         
         inputs_tanh_var = Variable(inputs_tanh, requires_grad=False)

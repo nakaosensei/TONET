@@ -42,6 +42,7 @@ python3 adversarialExamplesTest.py
 ```
 Na prática, o script adversarialExamplesGenerator.py utiliza a rede neural pré treinada (que está no diretório ../savedModels/trainedTonet) para gerar as asmostras adversariais e salvar em ../../outputs/adversarialExamples e ../../outputs/targets
 
+
 O script adversarialExamplesTest é quem de fato realiza o teste da rede neural (../savedModels/trainedTonet) com as amostras geradas, para isso, ele realiza testes com:
 - Dados reais somente (../outputs/originalDatabaseSamples e ../outputs/originalDatabaseTargets)
 - Dados reais + 5% de amostras adversarias (../outputs/datasetMixedSamples5 e ../outputs/datasetMixedTargets5)
@@ -51,6 +52,11 @@ O script adversarialExamplesTest é quem de fato realiza o teste da rede neural 
 - Dados reais + 50% de amostras adversarias (../outputs/datasetMixedSamples50 e ../outputs/datasetMixedTargets50)
 
 Os resultados são então impressos na tela, e também escritos no arquivo tests.txt
+
+Adicionalmente, existe um script que executa o mesmo experimento, mas fazendo o carregamento dos pacotes em proporção somente com base nos dados originais e nos arquivos em ../../outputs/adversarialExamples e ../../outputs/targets, esse script é:
+```bash
+python3 dualAdversarialDataSetTester.py
+```
 
 Para gerar os exemplos adversariais de maneira estocástica, use:
 ```bash

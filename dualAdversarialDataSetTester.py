@@ -57,43 +57,7 @@ def runTest(model):
     f.write(results)
     f.close()
 
-def runTraining(model):
-    model = model.to(DEVICE)
-    articleBatchSize = settingsJson['batchSize']
-    articleEpochs = settingsJson['epochs']    
 
-    tonetDataset = DualAdversarialDataSet(originalDatasetPath, originalLabelsPath,adversarialDatasetPath,adversarialLabelsPath, labelsPercentage) 
-    
-    preProcessed = tonetDataset.preProcessDataset()
-    tonetDataset.loadDataset(preProcessed)   
-    
-    loss_fn = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
-    train_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
-    test_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
-    epochs = articleEpochs
-    #epochs = 1
-    for t in range(epochs):
-        print(f"Epoch {t+1}\n-------------------------------")
-        train(train_dataloader, model, loss_fn, optimizer)
-        test(test_dataloader, model, loss_fn)             
-    torch.save(model.state_dict(), trainingPath)
-    print("Done!")    
-    return model
-
-def train(dataloader, model, loss_fn, optimizer):
-    size = len(dataloader.dataset)
-    model.train()
-    for batch, (X, y) in enumerate(dataloader):     
-        pred = model(X)        
-        loss = loss_fn(pred, y)
-        # Backpropagation
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        if batch % 100 == 0:
-            loss, current = loss.item(), (batch + 1) * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
 
 '''
@@ -106,9 +70,7 @@ if __name__=='__main__':
     model.load_state_dict(torch.load(trainingPath))
     model.eval()    
 
-    #executa o treino
-    #model = runTraining(model)
-
+    
     #Testa o modelo com base nos arquivos em featuresPath e targetsPath
     runTest(model)
 
