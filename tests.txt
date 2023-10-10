@@ -1,14 +1,14 @@
 1por cento de amostras adversarias
-Acurácia:61.838061061516115
+Acurácia:61.86365757596482
 5por cento de amostras adversarias
-Acurácia:59.68222322824287
+Acurácia:59.80043065422297
 10por cento de amostras adversarias
-Acurácia:57.2246244837344
+Acurácia:57.44720052901062
 20por cento de amostras adversarias
-Acurácia:52.908126466634386
+Acurácia:53.3170910100603
 40por cento de amostras adversarias
-Acurácia:46.12084226961798
+Acurácia:46.82099231213487
 50por cento de amostras adversarias
-Acurácia:43.40678613411919
+Acurácia:44.216184445034315
 60por cento de amostras adversarias
-Acurácia:41.040422792390345
+Acurácia:41.945123081650635

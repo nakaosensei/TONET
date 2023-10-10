@@ -7,7 +7,7 @@ Esse projeto contém o código fonte para a reprodução do trabalho, para o exe
 
 # Download das bases de dados e estrutura adicional
 Faça o download do arquivo disponível em:
-https://drive.google.com/file/d/1695Jyq4fEOMPUnxQFI27Y1QnvSKsJuCs/view?usp=sharing
+https://drive.google.com/file/d/1o0aA9w9pNsOWlss5IAfjcX046P3JJhUS/view?usp=sharing
 
 Ao extrair os arquivos zipados, você verá a seguinte estrutura de pastas:
 - 📂 data (Contém as bases de dados carregadas)
@@ -16,6 +16,9 @@ Ao extrair os arquivos zipados, você verá a seguinte estrutura de pastas:
 - 📂 inst-bibliotecas (Dependências do projeto)
 - 📂 savedModels (Redes neurais salvas)
 - 📂 src (Diretório de código do projeto, faça o git clone dentro do diretório src)
+
+Alternativamente, você pode baixar um zip completo (com o diretório src já incluso) em:
+https://drive.google.com/file/d/1vYwJ6hfaFKVsanDoa7pRFabRr2JPphxI/view?usp=drive_link
 
 
 # Guia rápido de instalação de dependencias
