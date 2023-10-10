@@ -18,7 +18,7 @@ Ao extrair os arquivos zipados, você verá a seguinte estrutura de pastas:
 - 📂 src (Diretório de código do projeto, faça o git clone dentro do diretório src)
 
 Uma vez que os arquivos estiverem descompactados em sua máquina, acesse o diretório src e executa o comando:
-git clone https://github.com/nakaosensei/TONET.
+git clone https://github.com/nakaosensei/TONET
 
 Alternativamente, você pode baixar um zip completo (com o diretório src já incluso) em:
 https://drive.google.com/file/d/1vYwJ6hfaFKVsanDoa7pRFabRr2JPphxI/view?usp=drive_link
