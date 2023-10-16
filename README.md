@@ -33,20 +33,23 @@ Comando: sudo ./downloadLibraries.sh
 
 
 # Guia de execução
-O primeiro passo importante é gerar os exemplos adversariais, no momento, o TONet é capaz de realizar essa tarefa de duas maneiras:
-- Através de uma rede neural artificial
-- Estocasticamente
+O primeiro passo importante é gerar a rede neural que será usada na criação das amostras adversarias, para isso, invoque o script:
+```bash
+python3 neuralNetworkGenerator.py
+```
+Ele irá treinar a rede neural e salvar o resultado em ../savedModels/trainedTonet.
 
-Para gerar exemplos adversariais através da rede artificial, utilize o script:
+Agora basta gerar exemplos adversariais através da rede artificial gerada, utilize o script:
 ```bash
 python3 adversarialExamplesGenerator.py
 ```
-E depois de gerar, você realizar o teste dessas amostras:
+Na prática, o script adversarialExamplesGenerator.py utiliza a rede neural pré treinada (que está no diretório ../savedModels/trainedTonet) para gerar as asmostras adversariais e salvar em ../../outputs/adversarialExamples e ../../outputs/targets
+
+
+Finalmente, para realizar o teste das amostras, use o seguinte script:
 ```bash
 python3 adversarialExamplesTest.py
 ```
-Na prática, o script adversarialExamplesGenerator.py utiliza a rede neural pré treinada (que está no diretório ../savedModels/trainedTonet) para gerar as asmostras adversariais e salvar em ../../outputs/adversarialExamples e ../../outputs/targets
-
 
 O script adversarialExamplesTest é quem de fato realiza o teste da rede neural (../savedModels/trainedTonet) com as amostras geradas, para isso, ele realiza testes com:
 - Dados reais somente (../outputs/originalDatabaseSamples e ../outputs/originalDatabaseTargets)
@@ -75,10 +78,6 @@ No momento, o teste das amostras estocásticas está fazendo a verificação con
 python3 stochasticAdversarialTester.py
 ```
 
-Até aqui foram apresentados os scripts necessários para gerar e testar as amostras adversariais, mas existem mais operações possíveis, por exemplo, para treinar uma rede neural que será usada para gerar as amostras adversarias, use script:
-```bash
-python3 tonetNN.py
-```
 
 Como bônus, foram realizados testes com outras configurações de redes neurais e do classificar k-NN sobre os dados originais, para os invocar, use:
 ```bash

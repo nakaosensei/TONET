@@ -100,9 +100,6 @@ if __name__=='__main__':
     model.load_state_dict(torch.load(trainingPath))
     model.eval()    
 
-    #executa o treino
-    #model = runTraining(model)
-
     #Testa o modelo com base nos arquivos em featuresPath e targetsPath
     runTest(model)
 

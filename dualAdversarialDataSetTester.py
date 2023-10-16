@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from utils.pyTorchUtils import *
 from neuralNetwork.TONetModel import *
 from datasetLoaders.dualDatasetLoaderAdversarial import DualAdversarialDataSet
-from datasetLoaders.datasetLoader import TonetDataSet
+from datasetLoaders.datasetLoaderAdversarial import AdversarialDataSet
 import os
 import gc
 
@@ -19,7 +19,7 @@ originalDatasetPath = '../outputs/originalDatabaseSamples/'
 originalLabelsPath = '../outputs/originalDatabaseTargets/'
 adversarialDatasetPath = '../outputs/adversarialExamples/'
 adversarialLabelsPath = '../outputs/targets/'
-labelsPercentage = 10
+
 
 def test(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
@@ -41,7 +41,11 @@ def runTest(model):
     results = ''
     articleBatchSize = settingsJson['batchSize']
     for i in range(0, len(settingsJson['testPercentages'])):
-        advDataset = DualAdversarialDataSet(originalDatasetPath, originalLabelsPath,adversarialDatasetPath,adversarialLabelsPath, settingsJson['testPercentages'][i]) 
+        print(str(settingsJson['testPercentages'][i])+' por cento de amostras adversarias')
+        if settingsJson['testPercentages'][i]==0:
+            advDataset = AdversarialDataSet(originalDatasetPath,originalLabelsPath)
+        else:
+            advDataset = DualAdversarialDataSet(originalDatasetPath, originalLabelsPath,adversarialDatasetPath,adversarialLabelsPath, settingsJson['testPercentages'][i]) 
         preProcessed = advDataset.preProcessDataset()
         advDataset.loadDataset(preProcessed)
         loss_fn = nn.CrossEntropyLoss()
@@ -56,9 +60,6 @@ def runTest(model):
     f = open('tests.txt','w')
     f.write(results)
     f.close()
-
-
-
 
 '''
 Basta executar o script stochasticAdversarialTester.py para testar

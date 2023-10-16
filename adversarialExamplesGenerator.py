@@ -58,7 +58,6 @@ def generateAdversarialExamples(model):
     mean = torch.unsqueeze(meanStd[0],dim=0)
     std = torch.unsqueeze(meanStd[1],dim=0) 
     
-    #loss_fn = distanceLoss2Norm
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
     train_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
@@ -136,6 +135,8 @@ if __name__=='__main__':
     endTime = time.time()
     print('Tempo de execucao:')
     print(endTime-startTime)
+
+    
 
     #runTest(model)
 
