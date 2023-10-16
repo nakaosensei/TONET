@@ -138,6 +138,32 @@ class DualAdversarialDataSet():
         for register in tensor:                
             arrayToFill.append(register)
 
+
+    def loadAdversarialFiles(self,totalData,labels,numberOfConsideredFiles):
+        advDatasetsName = os.listdir(self.adversarialDatasetPath)  
+        advDatasetsName.sort()      
+        for i in range(0,len(advDatasetsName)):
+            if i>numberOfConsideredFiles:
+                break            
+            self.loadDatasetToArray(advDatasetsName[i],totalData,self.adversarialDatasetPath)
+                
+        advClassesNames = os.listdir(self.adversarialLabelsPath)
+        advClassesNames.sort()
+        for i in range(0,len(advClassesNames)):
+            if i>numberOfConsideredFiles:
+                break
+            self.loadDatasetToArray(advClassesNames[i],labels,self.adversarialLabelsPath)
+
+    def convertToHashMap(self,array):
+        outHash = {}
+        for i in range(0,len(array)):
+            if array[i] not in outHash:
+                outHash[array[i].item()]=[i]
+            else:
+                outHash[array[i].item()].append(i)
+        return outHash
+
+
     def preProcessDataset(self):
         totalData = []
         labels = []
@@ -152,47 +178,54 @@ class DualAdversarialDataSet():
         for datasetNm in classesNames:
             self.loadDatasetToArray(datasetNm,labels,self.originalLabelsPath)           
         numberOfSamples = len(totalData)
-        print('Tamanho do dataset original:'+str(numberOfSamples))        
+               
         
         numberOfConsideredFiles = int(len(dataSetsName)*(self.labelsPercentage/100))
-        print('Quantidade de arquivos adversarios considerada:'+str(numberOfConsideredFiles))
-        advDatasetsName = os.listdir(self.adversarialDatasetPath)  
-        advDatasetsName.sort()      
-        for i in range(0,len(advDatasetsName)):
-            if i>numberOfConsideredFiles:
-                break            
-            self.loadDatasetToArray(advDatasetsName[i],totalData,self.adversarialDatasetPath)
-                
-        advClassesNames = os.listdir(self.adversarialLabelsPath)
-        advClassesNames.sort()
-        for i in range(0,len(advClassesNames)):
-            if i>numberOfConsideredFiles:
-                break
-            self.loadDatasetToArray(advClassesNames[i],labels,self.adversarialLabelsPath)
+        adversarialData = []
+        adversarialLabels = []
+        self.loadAdversarialFiles(adversarialData,adversarialLabels,numberOfConsideredFiles)
+
+        numberOfInstances = numberOfConsideredFiles * 1000
+        advLabelsHash = self.convertToHashMap(adversarialLabels)
+        print('Classes consideradas')
+        print(advLabelsHash.keys())
+        intancesPerLabel = numberOfInstances/len(advLabelsHash.keys())
+        print('Qt. amostras reais:'+str(numberOfSamples))
+        print('Qt. amostras adversárias:'+str(numberOfInstances)+','+' qt. amostras adversárias por classe:'+str(intancesPerLabel))
         
-        print('Raw Datasets loaded: COMPLETE')
-        
+        for lb in advLabelsHash.keys():
+            consumed = 0
+            while consumed < intancesPerLabel:
+                for j in range(0, len(advLabelsHash[lb])):
+                    if consumed>intancesPerLabel:
+                        break
+                    totalData.append(adversarialData[advLabelsHash[lb][j]])
+                    labels.append(adversarialLabels[advLabelsHash[lb][j]])
+                    consumed+=1              
+        print('Raw Datasets loaded: COMPLETE')        
         filteredData = self.filterClasses(totalData, labels)
         print('Filter classes: COMPLETE')
         
-        print('Porcentagem de amostras adversarias:'+str(self.labelsPercentage)+'%, Qtde amostras adversarias:'+str(len(filteredData['database'])-numberOfSamples))
-        print('Qt. registers on database:'+str(len(filteredData['database'])))        
+        totalInstances = len(filteredData['database'])
+        porcentagemFinalReais = numberOfSamples*100/totalInstances
+        porcentagemFinalAdversarios = numberOfInstances*100/totalInstances
+        print('Porcentagem de amostras adversarias utilizado:'+str(self.labelsPercentage)+'%')
+        print('Porcentagem de amostras reais utilizado: 100%')
+        print('Divisão da base após mescla:'+str(porcentagemFinalReais)+'%'+' dados reais, '+str(porcentagemFinalAdversarios)+'%'+' dados sintéticos')
+        print('Qt. de registros na base:'+str(totalInstances))
         return filteredData
    
 
     def loadDataset(self, preProcessed):            
-        self.tensorDatabase = preProcessed['database']       
-
+        self.tensorDatabase = preProcessed['database']
         tensorSizes = {}
         for tensor in self.tensorDatabase:
-            tensorSizes[len(tensor)]=0
-        
+            tensorSizes[len(tensor)]=0        
         self.labelsStr=preProcessed['labels']
         self.labelsHashMap = {}
         for i in range(0,len(self.labelsStr)):            
             if self.labelsStr[i].item() not in self.labelsHashMap:
-                self.labelsHashMap[self.labelsStr[i].item()]=len(self.labelsHashMap.keys())                 
-        
+                self.labelsHashMap[self.labelsStr[i].item()]=len(self.labelsHashMap.keys())      
         self.labels = []
         for lb in self.labelsStr:
             self.labels.append(self.labelsHashMap[lb.item()])

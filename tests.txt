@@ -1,14 +1,14 @@
 0por cento de amostras adversarias
 Acurácia:96.75558481564114
-1por cento de amostras adversarias
-Acurácia:95.99779135773166
 5por cento de amostras adversarias
-Acurácia:93.16273544752441
+Acurácia:92.95746159310467
 10por cento de amostras adversarias
-Acurácia:89.94454993461251
-20por cento de amostras adversarias
-Acurácia:84.25770099451779
-40por cento de amostras adversarias
-Acurácia:75.33574552556962
+Acurácia:89.50347277083408
+25por cento de amostras adversarias
+Acurácia:80.74139461389152
 50por cento de amostras adversarias
-Acurácia:71.76677437878189
+Acurácia:70.0642698248837
+75por cento de amostras adversarias
+Acurácia:62.43726324932821
+90por cento de amostras adversarias
+Acurácia:58.81526703516803

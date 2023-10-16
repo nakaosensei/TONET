@@ -29,15 +29,18 @@ Para instalação das bibliotecas necessárias, acesse a pasta **inst-biblioteca
 
 Comando: sudo ./downloadLibraries.sh
 
-
-
-
 # Guia de execução
 O primeiro passo importante é gerar a rede neural que será usada na criação das amostras adversarias, para isso, invoque o script:
 ```bash
 python3 neuralNetworkGenerator.py
 ```
-Ele irá treinar a rede neural e salvar o resultado em ../savedModels/trainedTonet.
+Ele irá treinar a rede neural que será usada para gerar os exemplos adversáriais e salvar o resultado em ../savedModels/trainedTonet.
+
+Após isso, precisaremos treinar um possível atacante com base nos dados originais, deixamos de exemplo uma rede neural de três camadas, para treinar esse modelo atacante disponibilizado, invoque:
+```bash
+python3 python3 attackerNN.py
+```
+Ele irá treinar a rede neural que tentará realizar a classificação dos dados e salvar o resultado em ../savedModels/trainedTonet.
 
 Agora basta gerar exemplos adversariais através da rede artificial gerada, utilize o script:
 ```bash
@@ -52,19 +55,15 @@ python3 adversarialExamplesTest.py
 ```
 
 O script adversarialExamplesTest é quem de fato realiza o teste da rede neural (../savedModels/trainedTonet) com as amostras geradas, para isso, ele realiza testes com:
-- Dados reais somente (../outputs/originalDatabaseSamples e ../outputs/originalDatabaseTargets)
-- Dados reais + 5% de amostras adversarias (../outputs/datasetMixedSamples5 e ../outputs/datasetMixedTargets5)
-- Dados reais + 10% de amostras adversarias (../outputs/datasetMixedSamples10 e ../outputs/datasetMixedTargets10)
-- Dados reais + 15% de amostras adversarias (../outputs/datasetMixedSamples15 e ../outputs/datasetMixedTargets15)
-- Dados reais + 25% de amostras adversarias (../outputs/datasetMixedSamples25 e ../outputs/datasetMixedTargets25)
-- Dados reais + 50% de amostras adversarias (../outputs/datasetMixedSamples50 e ../outputs/datasetMixedTargets50)
+- Dados reais somente 
+- Dados reais + 5% da base amostras adversárias
+- Dados reais + 10% da base amostras adversárias
+- Dados reais + 15% da base amostras adversárias
+- Dados reais + 25% da base amostras adversárias
+- Dados reais + 50% da base amostras adversárias
+- Dados reais + 75% da base amostras adversárias
+- Dados reais + 90% da base amostras adversárias
 
-Os resultados são então impressos na tela, e também escritos no arquivo tests.txt
-
-Adicionalmente, existe um script que executa o mesmo experimento, mas fazendo o carregamento dos pacotes em proporção somente com base nos dados originais e nos arquivos em ../../outputs/adversarialExamples e ../../outputs/targets, esse script é:
-```bash
-python3 dualAdversarialDataSetTester.py
-```
 
 Para gerar os exemplos adversariais de maneira estocástica, use:
 ```bash
@@ -72,16 +71,14 @@ python3 stochasticAdversarialGenerator.py
 ```
 O script stochasticAdversarialGenerator.py tenta gerar exemplos adversariais de maneira intuitiva, de modo a gerar pequenas oscilações pelo produto das grandesas dos dados originais por constantes pré-definidas, as amostras adversariais estocásticas são salvas nos diretórios ../../outputs/stochasticAdversarialExamples e ../../outputs/stochasticTargets
 
-
 No momento, o teste das amostras estocásticas está fazendo a verificação considerando somente a rede neural treinada (../savedModels/trainedTonet) e os exemplos adversariais gerados como teste. Para testar as amostras geradas, use:
 ```bash
 python3 stochasticAdversarialTester.py
 ```
 
-
 Como bônus, foram realizados testes com outras configurações de redes neurais e do classificar k-NN sobre os dados originais, para os invocar, use:
 ```bash
-python3 attackerNN.py
+
 python3 knnTester.py
 ```
 
