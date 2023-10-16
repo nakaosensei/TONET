@@ -38,7 +38,7 @@ Ele irá treinar a rede neural que será usada para gerar os exemplos adversári
 
 Após isso, precisaremos treinar um possível atacante com base nos dados originais, deixamos de exemplo uma rede neural de três camadas, para treinar esse modelo atacante disponibilizado, invoque:
 ```bash
-python3 python3 attackerNN.py
+python3 attackerNN.py
 ```
 Ele irá treinar a rede neural que tentará realizar a classificação dos dados e salvar o resultado em ../savedModels/attackerModelWeka.
 
