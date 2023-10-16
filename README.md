@@ -40,7 +40,7 @@ Após isso, precisaremos treinar um possível atacante com base nos dados origin
 ```bash
 python3 python3 attackerNN.py
 ```
-Ele irá treinar a rede neural que tentará realizar a classificação dos dados e salvar o resultado em ../savedModels/trainedTonet.
+Ele irá treinar a rede neural que tentará realizar a classificação dos dados e salvar o resultado em ../savedModels/attackerModelWeka.
 
 Agora basta gerar exemplos adversariais através da rede artificial gerada, utilize o script:
 ```bash
@@ -54,7 +54,7 @@ Finalmente, para realizar o teste das amostras, use o seguinte script:
 python3 adversarialExamplesTest.py
 ```
 
-O script adversarialExamplesTest é quem de fato realiza o teste da rede neural (../savedModels/trainedTonet) com as amostras geradas, para isso, ele realiza testes com:
+O script adversarialExamplesTest é quem de fato realiza o teste das amostras adversáriais contra um potencial classificador atacante, o script automaticamente invocará a rede neural atacante salva em (../savedModels/attackerModelWeka) com as amostras geradas, para isso, ele realiza testes com:
 - Dados reais somente 
 - Dados reais + 5% da base amostras adversárias
 - Dados reais + 10% da base amostras adversárias
