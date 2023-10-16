@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 from utils.pyTorchUtils import *
 from neuralNetwork.TONetModel import *
+from neuralNetwork.AttackerModel import *
 from datasetLoaders.dualDatasetLoaderAdversarial import DualAdversarialDataSet
 from datasetLoaders.datasetLoaderAdversarial import AdversarialDataSet
 import os
@@ -14,12 +15,11 @@ f = open('settings.json')
 settingsJson = json.load(f)
 DEVICE=get_device()
 datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
-trainingPath='../savedModels/trainedTonet'
+trainingPath='../savedModels/attackerModelWeka'
 originalDatasetPath = '../outputs/originalDatabaseSamples/'
 originalLabelsPath = '../outputs/originalDatabaseTargets/'
 adversarialDatasetPath = '../outputs/adversarialExamples/'
 adversarialLabelsPath = '../outputs/targets/'
-
 
 def test(dataloader, model, loss_fn):
     size = len(dataloader.dataset)
@@ -67,10 +67,9 @@ as amostras adversariais geradas com um modelo pre-treinado.
 '''
 if __name__=='__main__':    
     #Carrega o modelo pré-treinado  
-    model = ToNetNeuralNetwork()
+    model = AttackerNetwork()
     model.load_state_dict(torch.load(trainingPath))
     model.eval()    
-
     
     #Testa o modelo com base nos arquivos em featuresPath e targetsPath
     runTest(model)

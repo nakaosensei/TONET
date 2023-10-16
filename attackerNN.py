@@ -13,6 +13,8 @@ settingsJson = json.load(f)
 DEVICE=get_device()
 datasets = ['entry1','entry2','entry3','entry4','entry5','entry6','entry7','entry8','entry9','entry10']
 trainingPath = '../savedModels/attackerModelWeka'
+originalDatasetPath = '../outputs/originalDatabaseSamples/'
+originalLabelsPath = '../outputs/originalDatabaseTargets/'
 debugMode = True
 
 def train(dataloader, model, loss_fn, optimizer):
@@ -20,10 +22,7 @@ def train(dataloader, model, loss_fn, optimizer):
     model.train()
     for batch, (X, y) in enumerate(dataloader):        
         # Compute prediction error
-        
-        pred = model(X)          
-        
-    
+        pred = model(X) 
         loss = loss_fn(pred, y)
 
         # Backpropagation
@@ -57,7 +56,7 @@ def runTraining(model):
     articleBatchSize = settingsJson['batchSize']
     articleEpochs = settingsJson['epochs']
     
-    tonetDataset = TonetDataSet(datasets)    
+    tonetDataset = AdversarialDataSet(originalDatasetPath,originalLabelsPath)    
     preProcessed = tonetDataset.preProcessDataset()
     tonetDataset.loadDataset(preProcessed)
     #loss_fn = distanceLoss2Norm
@@ -77,35 +76,16 @@ def runTraining(model):
 def runTest(model):
     model.load_state_dict(torch.load(trainingPath))
     articleBatchSize = settingsJson['batchSize']
-    tonetDataset = TonetDataSet(datasets)    
+    tonetDataset = AdversarialDataSet(originalDatasetPath,originalLabelsPath)    
     preProcessed = tonetDataset.preProcessDataset()
     tonetDataset.loadDataset(preProcessed)
     loss_fn = nn.CrossEntropyLoss()
     test_dataloader = DataLoader(tonetDataset, batch_size=articleBatchSize, shuffle=True)
     test(test_dataloader, model, loss_fn)
 
-def test_adversarialExamples(model):
-    tensor = torch.load('adversarial_examples.pt')
-    out = ""
-    for i in range(0, len(tensor)):
-        for j in range(0,len(tensor[i])):
-            out+=str(float(tensor[i][j]))+' | '
-        out+='\n'
-    f = open('adversarial_examples.txt','w')
-    f.write(out)
-    f.close()
-
-    #pred = model(X)
-    #test_loss += loss_fn(pred, y).item()
-    #correct += (pred.argmax(1) == y).type(torch.float).sum().item()
-    
-    
-    return model
-
 if __name__=='__main__':   
-    model = AttackerNetwork()
-    
-    runTraining(model)
+    model = AttackerNetwork()    
+    #runTraining(model)
     runTest(model)
     
     

@@ -14,7 +14,7 @@
     "targetsPath":  ["../outputs/originalDatabaseTargets/"],    
     "featuresPath.bkp": ["../outputs/originalDatabaseSamples/","../outputs/datasetMixedSamples5/","../outputs/datasetMixedSamples10/","../outputs/datasetMixedSamples25/","../outputs/datasetMixedSamples50/"],
     "targetsPath.bkp":  ["../outputs/originalDatabaseTargets/","../outputs/datasetMixedTargets5/","../outputs/datasetMixedTargets10/","../outputs/datasetMixedTargets25/","../outputs/datasetMixedTargets50/"],
-    "testPercentages":[0,1,5,10,20,40,50,60],
+    "testPercentages":[0,1,5,10,20,40,50],
     "adversarialExamplesSamplesPathML":"../outputs/adversarialExamples/",
     "adversarialExamplesTargersPathML": "../outputs/targets/",
     "labelsColumn":"266",

@@ -7,6 +7,7 @@ import torch
 from torch.utils.data import DataLoader
 from utils.pyTorchUtils import *
 from neuralNetwork.TONetModel import *
+from neuralNetwork.AttackerModel import *
 import random
 
 f = open('settings.json')
@@ -25,8 +26,7 @@ class DualAdversarialDataSet():
         self.originalLabelsPath = originalLabelsPath
         self.adversarialDatasetPath=adversarialDatasetPath
         self.adversarialLabelsPath=adversarialLabelsPath
-        self.labelsPercentage = labelsPercentage
-        
+        self.labelsPercentage = labelsPercentage        
 
     def upSampleClasses(self, dataset, classesHashMap):
         classesNames = list(classesHashMap.keys())
