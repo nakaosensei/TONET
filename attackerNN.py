@@ -85,7 +85,7 @@ def runTest(model):
 
 if __name__=='__main__':   
     model = AttackerNetwork()    
-    #runTraining(model)
+    runTraining(model)
     runTest(model)
     
     
