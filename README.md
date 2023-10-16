@@ -7,7 +7,7 @@ Esse projeto contém o código fonte para a reprodução do trabalho, para o exe
 
 # Download das bases de dados e estrutura adicional
 Faça o download do arquivo disponível em:
-https://drive.google.com/file/d/1o0aA9w9pNsOWlss5IAfjcX046P3JJhUS/view?usp=sharing
+https://drive.google.com/file/d/1dguIxiTrVcaGDMVtHE-mxjhQWxP5YtvW/view?usp=drive_link
 
 Ao extrair os arquivos zipados, você verá a seguinte estrutura de pastas:
 - 📂 data (Contém as bases de dados carregadas)
@@ -21,7 +21,7 @@ Uma vez que os arquivos estiverem descompactados em sua máquina, acesse o diret
 git clone https://github.com/nakaosensei/TONET
 
 Alternativamente, você pode baixar um zip completo (com o diretório src já incluso) em:
-https://drive.google.com/file/d/1vYwJ6hfaFKVsanDoa7pRFabRr2JPphxI/view?usp=drive_link
+https://drive.google.com/file/d/1vxG06AX7aAjSQa8-bxvaI2k6nCgvhCAl/view?usp=sharing
 
 
 # Guia rápido de instalação de dependencias
