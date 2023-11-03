@@ -137,11 +137,6 @@ if __name__=='__main__':
     print(endTime-startTime)
 
     
-
-    #runTest(model)
-
-    
-    
     
     
     

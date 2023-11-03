@@ -8,6 +8,7 @@ from neuralNetwork.TONetModel import *
 from neuralNetwork.AttackerModel import *
 from datasetLoaders.dualDatasetLoaderAdversarial import DualAdversarialDataSet
 from datasetLoaders.datasetLoaderAdversarial import AdversarialDataSet
+from torchmetrics import ConfusionMatrix
 import os
 import gc
 
@@ -27,15 +28,27 @@ def test(dataloader, model, loss_fn):
     num_batches = len(dataloader)
     model.eval()
     test_loss, correct = 0, 0
+    confMatrix = ConfusionMatrix(task="MultiClass",num_classes=6)
+    completeConfMatrix = None
     with torch.no_grad():
         for X, y in dataloader:            
             pred = model(X)           
-            test_loss += loss_fn(pred, y).item()
+            test_loss += loss_fn(pred, y).item()           
+            results = confMatrix(pred.argmax(1),y)
+            if completeConfMatrix is None:
+                completeConfMatrix = results
+            else:
+                completeConfMatrix = torch.add(completeConfMatrix,results)
+
+            
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
     test_loss /= num_batches
-    correct /= size    
+    correct /= size
+    print('Matriz de confusao')    
+    print(completeConfMatrix)
+    
     print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
-    return 100*correct
+    return {'acuracia':100*correct,'matrizConfusao':completeConfMatrix}
 
 def runTest(model):    
     results = ''
@@ -50,7 +63,10 @@ def runTest(model):
         advDataset.loadDataset(preProcessed)
         loss_fn = nn.CrossEntropyLoss()
         test_dataloader = DataLoader(advDataset, batch_size=articleBatchSize, shuffle=True)
-        accuracy = test(test_dataloader, model, loss_fn)
+        testData = test(test_dataloader, model, loss_fn)
+        accuracy = testData['acuracia']
+        matrizConfusao = testData['matrizConfusao']
+        save3DTensorAsStringFile(matrizConfusao,'../outputs/confusionMatrix/'+str(settingsJson['testPercentages'][i]))
         results += str(settingsJson['testPercentages'][i])+'%'+' da base de amostras adversarias utilizado\nAcurácia:'+str(accuracy)+'\n'
         del test_dataloader
         del loss_fn

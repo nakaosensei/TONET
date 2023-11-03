@@ -1,14 +1,14 @@
-0por cento de amostras adversarias
+0% da base de amostras adversarias utilizado
 Acurácia:96.75558481564114
-5por cento de amostras adversarias
+5% da base de amostras adversarias utilizado
 Acurácia:92.95746159310467
-10por cento de amostras adversarias
+10% da base de amostras adversarias utilizado
 Acurácia:89.50347277083408
-25por cento de amostras adversarias
+25% da base de amostras adversarias utilizado
 Acurácia:80.74139461389152
-50por cento de amostras adversarias
+50% da base de amostras adversarias utilizado
 Acurácia:70.0642698248837
-75por cento de amostras adversarias
+75% da base de amostras adversarias utilizado
 Acurácia:62.43726324932821
-90por cento de amostras adversarias
+90% da base de amostras adversarias utilizado
 Acurácia:58.81526703516803

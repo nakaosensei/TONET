@@ -14,7 +14,9 @@ def df_to_tensor(df):
 
 def save3DTensorAsStringFile(tensor,filename):
     out = ""
+    argMaxes = ""
     for i in range(0, len(tensor)):
+        argMaxes+=str(float(tensor[i].argmax()))+'\n'
         for j in range(0,len(tensor[i])):
             if j==0:
                 out+='['
@@ -27,6 +29,9 @@ def save3DTensorAsStringFile(tensor,filename):
     print(filename)
     f = open(filename+'.txt','w')
     f.write(out)
+    f.close()
+    f = open('argmaxes.txt','w')
+    f.write(argMaxes)
     f.close()
 
 def save2DTensorAsStringFile(tensor,filename):
@@ -45,3 +50,4 @@ def save2DTensorAsStringFile(tensor,filename):
     f = open(filename+'.txt','w')
     f.write(out)
     f.close()
+
